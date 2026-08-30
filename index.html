@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Puglia 2026">
+<title>Puglia 2026 — il matrimonio</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+ --bg:#f8f9fb;--card:#fff;--text:#1a1a2e;--text2:#5a5a7a;--text3:#9a9ab0;
+ --accent:#2563eb;--orange:#e8590c;--green:#059669;--purple:#7c3aed;--teal:#0891b2;--red:#dc2626;
+ --amber:#b45309;--amberbg:#fffbeb;--amberbd:#fcd34d;
+ --border:#ebebf0;--shadow:0 2px 8px rgba(0,0,0,.06);--shadow-md:0 4px 16px rgba(0,0,0,.08);
+ --r:16px;--r-sm:12px;
+ --font:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+ --bg:#0f0f1a;--card:#1c1c2e;--text:#eaeaf0;--text2:#a0a0b8;--text3:#666680;
+ --border:#2a2a3e;--amberbg:#2a2210;--amber:#fcd34d;--amberbd:#78561b;
+ --shadow:0 2px 8px rgba(0,0,0,.2);--shadow-md:0 4px 16px rgba(0,0,0,.3);}}
+[data-theme=dark]{--bg:#0f0f1a;--card:#1c1c2e;--text:#eaeaf0;--text2:#a0a0b8;--text3:#666680;
+ --border:#2a2a3e;--amberbg:#2a2210;--amber:#fcd34d;--amberbd:#78561b;
+ --shadow:0 2px 8px rgba(0,0,0,.2);--shadow-md:0 4px 16px rgba(0,0,0,.3);}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.55;
+ -webkit-tap-highlight-color:transparent;padding-bottom:60px}
+button{font-family:var(--font);cursor:pointer;border:none;background:none;color:inherit}
+a{color:var(--accent);text-decoration:none}
+
+.topbar{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.88);
+ border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;
+ -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+[data-theme=dark] .topbar{background:rgba(15,15,26,.88)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .topbar{background:rgba(15,15,26,.88)}}
+.topbar-title{flex:1;min-width:0}
+.topbar-title h1{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-title span{font-size:11px;color:var(--text3)}
+.topbar-btn{width:34px;height:34px;border-radius:50%;background:var(--bg);display:flex;
+ align-items:center;justify-content:center;font-size:15px;flex:none}
+.topbar-btn:active{transform:scale(.9)}
+
+.map-section{position:relative;overflow:hidden;transition:height .35s cubic-bezier(.4,0,.2,1);height:210px}
+.map-section.expanded{height:56vh}
+#map{width:100%;height:100%;background:var(--bg)}
+.map-expand{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--card);
+ padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;color:var(--text2);
+ box-shadow:var(--shadow-md);z-index:500}
+.mk{display:flex;align-items:center;justify-content:center;border-radius:50%;
+ background:var(--card);border:2.5px solid var(--accent);width:30px;height:30px;font-size:15px;
+ box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.mk.visited{opacity:.45;border-color:var(--green)}
+.mk-num{background:var(--accent);color:#fff;border-color:#fff;font-size:12px;font-weight:700;
+ width:24px;height:24px}
+
+.content{max-width:760px;margin:0 auto;padding:14px}
+
+.ask{background:var(--card);border-radius:var(--r);padding:13px;box-shadow:var(--shadow);
+ margin-bottom:14px;border:1px solid var(--border)}
+.ask-head{font-size:14px;font-weight:700;margin-bottom:9px}
+.ask-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:7px;scrollbar-width:none}
+.ask-chips::-webkit-scrollbar{display:none}
+.ask-chip{padding:6px 12px;border-radius:18px;background:var(--bg);font-size:12px;font-weight:600;
+ color:var(--text2);white-space:nowrap;border:1.5px solid var(--border);flex:none}
+.ask-chip.hot{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ask-chip:active{transform:scale(.94)}
+.ask-form{display:flex;gap:7px;margin-top:8px}
+.ask-input{flex:1;padding:9px 13px;border-radius:20px;border:1.5px solid var(--border);
+ background:var(--bg);font-size:14px;color:var(--text);font-family:var(--font)}
+.ask-input:focus{outline:none;border-color:var(--accent)}
+.ask-send{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;
+ font-size:16px;font-weight:700;flex:none}
+.ask-out{margin-top:11px}
+.ask-out:empty{display:none}
+.ask-t{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;
+ letter-spacing:.4px;margin:10px 0 6px}
+
+.row{display:flex;gap:9px;padding:9px 0;border-top:1px solid var(--border);align-items:flex-start}
+.row:first-child{border-top:none}
+.row-b{flex:none;min-width:44px;font-size:11px;font-weight:700;color:var(--accent);
+ background:var(--bg);border-radius:8px;padding:3px 6px;text-align:center}
+.row-m{flex:1;min-width:0}
+.row-n{font-size:14px;font-weight:600;line-height:1.35}
+.row-jp{font-size:11px;color:var(--text3)}
+.row-d{font-size:12px;color:var(--text2);margin-top:2px}
+.row-meta{font-size:11px;color:var(--text3);margin-top:3px}
+
+.tools{display:flex;gap:5px;flex:none;align-items:center}
+.tool{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);
+ background:var(--card);display:flex;align-items:center;justify-content:center;font-size:15px}
+.tool:active{transform:scale(.9)}
+.row .tool{width:26px;height:26px;font-size:12px}
+
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:9px;
+ background:var(--bg);color:var(--text2);margin-right:4px}
+.badge.open{background:#d1fae5;color:#065f46}
+.badge.shut{background:#fee2e2;color:#991b1b}
+[data-theme=dark] .badge.open{background:#064e3b;color:#6ee7b7}
+[data-theme=dark] .badge.shut{background:#7f1d1d;color:#fca5a5}
+.badge.t100{background:#fef3c7;color:#92400e}
+[data-theme=dark] .badge.t100{background:#78350f;color:#fcd34d}
+
+.warn{background:var(--amberbg);border:1px solid var(--amberbd);color:var(--amber);
+ border-radius:var(--r-sm);padding:8px 11px;font-size:12px;margin-top:7px;line-height:1.45}
+.warn b{font-weight:700}
+
+.intro{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:11px;
+ border:1px solid var(--border);overflow:hidden}
+.intro>summary{padding:13px;font-size:14px;font-weight:700;cursor:pointer;list-style:none;
+ display:flex;align-items:center;gap:8px}
+.intro>summary::-webkit-details-marker{display:none}
+.intro>summary::after{content:'▾';margin-left:auto;color:var(--text3);font-size:12px}
+.intro[open]>summary::after{content:'▴'}
+.intro-body{padding:0 13px 13px;font-size:13px;color:var(--text2);line-height:1.6}
+.intro-body p{margin-bottom:8px}
+
+.tabs{position:sticky;top:55px;z-index:90;background:var(--card);border-bottom:1px solid var(--border);
+ padding:9px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 13px;border-radius:22px;font-size:12px;font-weight:600;color:var(--text2);
+ background:var(--bg);white-space:nowrap;border:1.5px solid transparent;flex:none}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.day{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:14px;
+ overflow:hidden;border:1px solid var(--border)}
+.day-h{padding:13px;color:#fff}
+.day-n{font-size:11px;font-weight:700;opacity:.9;letter-spacing:.5px}
+.day-t{font-size:17px;font-weight:700;margin:2px 0 4px}
+.day-m{font-size:11px;opacity:.92;background:rgba(0,0,0,.22);display:inline-block;
+ padding:2px 8px;border-radius:10px}
+.day-b{padding:13px}
+.day-note{font-size:12px;font-style:italic;color:var(--text2);background:var(--bg);
+ border-radius:var(--r-sm);padding:8px 11px;margin-bottom:11px}
+
+.ev{position:relative;padding:0 0 15px 34px}
+.ev:last-child{padding-bottom:0}
+.ev::after{content:'';position:absolute;left:14px;top:30px;bottom:0;width:2px;background:var(--border)}
+.ev:last-child::after{display:none}
+.ev[data-ico]::before{content:attr(data-ico);position:absolute;left:0;top:0;width:29px;height:29px;
+ border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;
+ align-items:center;justify-content:center;font-size:14px;z-index:1}
+.ev-t{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.3px}
+.ev-n{font-size:14px;font-weight:600;margin-top:1px;line-height:1.35}
+.ev-note{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+.ev-alt{font-size:12px;color:var(--text2);background:var(--bg);border-radius:var(--r-sm);
+ padding:7px 10px;margin-top:6px}
+.ev-alt b{color:var(--text)}
+.ev-bk{font-size:11px;font-weight:700;color:var(--orange);margin-top:4px}
+.ev-tools{margin-top:6px}
+
+footer{text-align:center;font-size:11px;color:var(--text3);padding:20px 14px;line-height:1.7}
+
+
+/* ── checklist (Davide e' flessibile: niente orari, solo cose da fare) */
+.ev.chk{display:flex;gap:9px;align-items:flex-start}
+.ev-box{flex:none;width:22px;height:22px;border:2px solid var(--border);border-radius:6px;
+ background:var(--bg);cursor:pointer;font-size:13px;line-height:19px;text-align:center;
+ color:var(--green);font-weight:800;margin-top:1px;transition:.12s}
+.ev-box:hover{border-color:var(--accent)}
+.ev-box.on{background:var(--green);border-color:var(--green);color:#fff}
+.ev.done .ev-n{text-decoration:line-through;opacity:.5}
+.ev-when{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.4px;
+ padding:2px 7px;border-radius:5px;background:var(--amberbg);color:var(--amber);
+ border:1px solid var(--amberbd);margin-right:6px;vertical-align:1px}
+/* ── dove dormo, in fondo alla giornata */
+.sleep{margin:14px -13px -13px;padding:12px 13px;border-top:2px dashed var(--border);
+ background:var(--bg2);border-radius:0 0 12px 12px}
+.sleep-h{font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--text3);
+ text-transform:uppercase;margin-bottom:5px}
+.sleep-n{font-weight:700;font-size:14px}
+.sleep-m{font-size:12px;color:var(--text2);margin-top:3px}
+.sleep-w{font-size:12px;color:var(--amber);margin-top:5px;font-weight:600}
+/* ── cruscotto obiettivi */
+.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:9px;
+ margin:11px 0}
+.goal{border:1.5px solid var(--border);border-radius:11px;padding:10px 11px;background:var(--bg)}
+.goal-t{font-size:11px;font-weight:700;color:var(--text2);display:flex;gap:5px;align-items:center}
+.goal-n{font-size:21px;font-weight:800;margin:3px 0 5px;letter-spacing:-.5px}
+.goal-n small{font-size:12px;font-weight:600;color:var(--text3)}
+.goal-bar{height:6px;border-radius:4px;background:var(--border);overflow:hidden}
+.goal-bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.goal.full .goal-bar i{background:var(--green)}
+.goal.full .goal-n{color:var(--green)}
+/* ── "oggi chiudi": gli obiettivi del giorno, in cima */
+.today{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);
+ padding:10px 12px;margin-bottom:11px}
+.today-h{font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--text3);
+ text-transform:uppercase;margin-bottom:7px}
+.today-r{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:13px}
+.today-r .tk{width:17px;height:17px;border:1.5px solid var(--border);border-radius:5px;
+ background:var(--card);flex:none;font-size:11px;line-height:14px;color:transparent;
+ padding:0;margin-top:1px}
+.today-r.on .tk{background:var(--green);border-color:var(--green);color:#fff}
+.today-r.on .tw{text-decoration:line-through;opacity:.55}
+.today-c{font-size:10px;font-weight:800;color:var(--text3);flex:none;margin-top:2px}
+/* ── colazione */
+.brk{display:flex;align-items:center;gap:7px;font-size:12px;padding:7px 11px;
+ border-radius:var(--r-sm);margin-bottom:11px;background:var(--bg);
+ border:1px solid var(--border)}
+.brk.yes{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+[data-theme=dark] .brk.yes{background:#052e21;border-color:#065f46;color:#6ee7b7}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .brk.yes{
+ background:#052e21;border-color:#065f46;color:#6ee7b7}}
+/* ── progressione dentro la giornata */
+.prog{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;
+ border-top:1px solid var(--border)}
+.prog b{font-size:10px;font-weight:800;letter-spacing:.4px;padding:3px 8px;border-radius:20px;
+ background:var(--accent);color:#fff}
+.prog b.done{background:var(--green)}
+/* ── spese */
+.cost-tot{display:flex;justify-content:space-between;align-items:baseline;
+ padding:11px 0 3px;border-top:2px solid var(--text);margin-top:7px;font-weight:800}
+.cost-tot span:last-child{font-size:20px;letter-spacing:-.5px}
+.cost-r{display:flex;justify-content:space-between;gap:10px;padding:5px 0;
+ border-bottom:1px solid var(--border);font-size:13px}
+.cost-r span:last-child{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
+.cost-r.sub{color:var(--text2);font-size:12px}
+
+/* ── vista obiettivi: le collezioni da smarcare */
+.obj-nav{display:flex;gap:6px;overflow-x:auto;padding:10px 13px;margin:0 -13px;
+ -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.obj-nav::-webkit-scrollbar{display:none}
+.obj-tab{flex:none;padding:8px 13px;border-radius:22px;font-size:12px;font-weight:700;
+ border:1.5px solid var(--border);background:var(--bg);color:var(--text2);white-space:nowrap}
+.obj-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.obj-pane{display:none}
+.obj-pane.on{display:block}
+.obj-head{display:flex;align-items:baseline;gap:9px;margin:13px 0 4px}
+.obj-head h3{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.obj-head span{font-size:13px;font-weight:700;color:var(--text3);
+ font-variant-numeric:tabular-nums}
+.obj-bar{height:8px;border-radius:5px;background:var(--border);overflow:hidden;margin-bottom:11px}
+.obj-bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:.25s}
+.obj-bar.full i{background:var(--green)}
+.obj-li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;
+ border-bottom:1px solid var(--border)}
+.obj-li:last-child{border-bottom:none}
+.obj-box{flex:none;width:24px;height:24px;border:2px solid var(--border);border-radius:7px;
+ background:var(--bg);cursor:pointer;font-size:14px;line-height:21px;text-align:center;
+ color:var(--green);font-weight:800;transition:.12s}
+.obj-box:hover{border-color:var(--accent)}
+.obj-box.on{background:var(--green);border-color:var(--green);color:#fff}
+.obj-li.done .obj-n{text-decoration:line-through;opacity:.45}
+.obj-n{font-weight:650;font-size:14px}
+.obj-m{font-size:12px;color:var(--text2);margin-top:2px}
+.obj-g{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;
+ background:var(--bg2);color:var(--text2);border:1px solid var(--border);margin-left:5px}
+.obj-g.day{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
+[data-theme=dark] .obj-g.day{background:#1e3a5f;color:#93c5fd;border-color:#2c4f7c}
+.obj-g.res{background:var(--amberbg);color:var(--amber);border-color:var(--amberbd)}
+/* ── prezzo a notte */
+.sleep-p{display:flex;gap:7px;align-items:baseline;margin-top:6px;flex-wrap:wrap}
+.sleep-p b{font-size:17px;font-weight:800;letter-spacing:-.4px}
+.sleep-p small{font-size:11px;color:var(--text3)}
+.pn{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px}
+.pn.hi{background:#fee2e2;color:#991b1b}
+.pn.lo{background:#d1fae5;color:#065f46}
+.pn.mid{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+[data-theme=dark] .pn.hi{background:#7f1d1d;color:#fca5a5}
+[data-theme=dark] .pn.lo{background:#064e3b;color:#6ee7b7}
+
+@media print{
+ body{padding:0;background:#fff}
+ .topbar,.map-section,.tabs,.ask,.tool,.tools,.map-expand{display:none!important}
+ .intro{border:1px solid #ccc;box-shadow:none}
+ .intro>summary::after{display:none}
+ .intro-body{display:block!important}
+ .day{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+ .content{max-width:100%}
+}
+
+.intro.urgent{border:1.5px solid var(--amberbd);background:var(--amberbg)}
+.intro.urgent>summary{color:var(--amber)}
+.pill{font-size:10px;font-weight:800;padding:2px 7px;border-radius:9px;background:var(--bg);
+ color:var(--text2);border:1px solid var(--border);margin-left:6px}
+.pill.ok{background:#d1fae5;color:#065f46;border-color:#a7f3d0}
+.pill.warn{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+[data-theme=dark] .pill.ok{background:#064e3b;color:#6ee7b7;border-color:#065f46}
+[data-theme=dark] .pill.warn{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
+.call{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);
+ padding:10px 12px;margin-bottom:9px}
+.call:last-child{margin-bottom:0}
+.call-h{display:flex;gap:8px;align-items:flex-start}
+.call-n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#fff;
+ font-size:11px;font-weight:800;line-height:20px;text-align:center}
+.call-w{flex:1;font-size:14px;font-weight:700;color:var(--text);line-height:1.35}
+.call-m{font-size:12px;color:var(--text2);margin-top:4px;padding-left:28px}
+.call-d{font-size:11px;font-weight:700;color:var(--amber);margin-top:3px;padding-left:28px}
+.call-y{font-size:12px;color:var(--text2);margin-top:5px;padding-left:28px;line-height:1.5}
+.day-area{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;
+ letter-spacing:.4px;margin-bottom:9px}
+.ev-meta{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5}
+.ev-bk{font-size:11px;font-weight:800;letter-spacing:.4px;margin-top:5px;display:inline-block;
+ padding:2px 8px;border-radius:9px}
+.ev-bk.ok{background:#d1fae5;color:#065f46}
+.ev-bk.pending{background:#fee2e2;color:#991b1b}
+[data-theme=dark] .ev-bk.ok{background:#064e3b;color:#6ee7b7}
+[data-theme=dark] .ev-bk.pending{background:#7f1d1d;color:#fca5a5}
+.area-tour-block{border:1.5px solid #1565c0;border-radius:var(--r-sm);padding:8px 11px;
+ margin-top:7px;font-size:12px;line-height:1.7;color:var(--text);background:var(--bg)}
+.bk-r{border-top:1px solid var(--border);padding:9px 0}
+.bk-r:first-child{border-top:none}
+.bk-h{display:flex;align-items:center;gap:6px;font-size:14px;flex-wrap:wrap}
+.bk-m{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
+.sleep{background:var(--bg)}
+@media print{.intro.urgent{border:2px solid #333}.call{border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<div class="topbar">
+ <div class="topbar-title"><h1>Puglia 2026 — il matrimonio</h1><span>24–27 settembre 2026 · 4 giorni · Davide e Arianna</span></div>
+ <button class="topbar-btn" id="thBtn" title="Chiaro/scuro" aria-label="Cambia tema">◐</button>
+</div>
+<div class="map-section">
+ <div id="map"></div>
+ <button class="map-expand">▾ Ingrandisci la mappa</button>
+</div>
+<div class="tabs"><button class="tab on" onclick="goDay(1)">✈️ G1</button><button class="tab" onclick="goDay(2)">🚤 G2</button><button class="tab" onclick="goDay(3)">💍 G3</button><button class="tab" onclick="goDay(4)">🛫 G4</button></div>
+<div class="content">
+<div class="ask">
+<div class="ask-head">💬 Chiedimi qualcosa</div>
+<div class="ask-chips">
+<button class="ask-chip hot" onclick="aChip('oggi')">Oggi</button>
+<button class="ask-chip hot" onclick="aChip('domani')">Domani</button>
+<button class="ask-chip" onclick="aChip('telefonate')">📋 Telefonate</button>
+<button class="ask-chip" onclick="aChip('dove mangiamo')">🍽️ Mangiare</button>
+<button class="ask-chip" onclick="aChip('barca')">🚤 Barca</button>
+<button class="ask-chip" onclick="aChip('matrimonio')">💍 Matrimonio</button>
+<button class="ask-chip" onclick="aChip('spiagge')">🏖️ Mare</button>
+<button class="ask-chip" onclick="aChip('chiese')">⛪ Chiese</button>
+<button class="ask-chip" onclick="aChip('vino')">🍷 Vino</button>
+<button class="ask-chip" onclick="aChip('cosa e prenotato')">🎟️ Prenotato</button>
+<button class="ask-chip" onclick="aChip('numeri')">Numeri</button>
+<button class="ask-chip" onclick="aChip('aperto ora')">🕒 Aperto ora</button>
+<button class="ask-chip" onclick="aChip('vicino a me')">Vicino a me</button>
+<button class="ask-chip" onclick="aChip('tramonto')">🌇 Tramonto</button>
+<button class="ask-chip" onclick="aChip('dove dormo')">🛏️ Dormire</button>
+</div>
+<form class="ask-form" onsubmit="return aSubmit(event)" autocomplete="off">
+<input class="ask-input" id="askInput" placeholder="Scrivi una domanda..." enterkeyhint="search">
+<button class="ask-send" type="submit" aria-label="Chiedi">↑</button>
+</form>
+<div class="ask-out" id="askOut"></div>
+</div>
+<details class="intro urgent" open><summary>📋 Da fare prima di partire <span class="pill">5</span></summary><div class="intro-body">
+<div class="call">
+<div class="call-h"><span class="call-n">1</span><div class="call-w">Concordare il check-in tardivo o autonomo</div>
+<div class="tools"><a class="tool" href="tel:+390808722153" title="Chiama B&amp;B La Dimora, Corato" aria-label="Chiama B&amp;B La Dimora, Corato">📞</a></div>
+</div>
+<div class="call-m">B&amp;B La Dimora, Corato · +39 080 872 2153</div>
+<div class="call-d">Scadenza: <b>subito</b></div>
+<div class="call-y">Il check-in chiude alle 19:30 di sabato, ma alle 19:30 sei a Villa Santelia in pieno ricevimento e ne uscirai a notte. Senza un accordo torni a una porta chiusa. Chiedi anche il parcheggio privato, che è gratuito ma su prenotazione.</div>
+</div>
+<div class="call">
+<div class="call-h"><span class="call-n">2</span><div class="call-w">Prenotare il tour delle grotte marine, 2 persone, partenza 09:00 di venerdì 25</div>
+<div class="tools"><a class="tool" href="tel:+39368572426" title="Chiama Freedome (online) oppure Vieste in Barca" aria-label="Chiama Freedome (online) oppure Vieste in Barca">📞</a></div>
+</div>
+<div class="call-m">Freedome (online) oppure Vieste in Barca · +39 368 572426</div>
+<div class="call-d">Scadenza: <b>entro il 23 settembre</b></div>
+<div class="call-y">Serve prenotare con almeno due giorni di anticipo, in alta stagione a volte una settimana. Online su freedome.it la conferma è immediata e si cancella gratis fino a 24 ore prima; al telefono le motobarche di Vieste in Barca costano gli stessi 30 € a testa.</div>
+</div>
+<div class="call">
+<div class="call-h"><span class="call-n">3</span><div class="call-w">Chiedere il late check-out di sabato e comunicare l&#x27;ora di arrivo di venerdì</div>
+<div class="tools"><a class="tool" href="tel:+393886573748" title="Chiama Appartamento L&#x27;ANGOLO, San Severo" aria-label="Chiama Appartamento L&#x27;ANGOLO, San Severo">📞</a></div>
+</div>
+<div class="call-m">Appartamento L&#x27;ANGOLO, San Severo · +39 388 657 3748</div>
+<div class="call-d">Scadenza: <b>entro il 22 settembre</b></div>
+<div class="call-y">Il check-out è alle 11:00 e la cerimonia alle 16:00: senza un&#x27;ora in più non hai una stanza in cui vestirti. Loro chiedono comunque di comunicare in anticipo l&#x27;orario di arrivo.</div>
+</div>
+<div class="call">
+<div class="call-h"><span class="call-n">4</span><div class="call-w">Chiedere dove lasciare l&#x27;auto</div>
+<div class="tools"><a class="tool" href="tel:+393463039685" title="Chiama B&amp;B Rossini, Vieste" aria-label="Chiama B&amp;B Rossini, Vieste">📞</a></div>
+</div>
+<div class="call-m">B&amp;B Rossini, Vieste · +39 346 303 9685</div>
+<div class="call-d">Scadenza: <b>entro il 23 settembre</b></div>
+<div class="call-y">La struttura non ha parcheggio e arrivi alle 20:05 in una città che non conosci. Lo stesso numero risulta anche a Marina Vieste, il diportistico del porto: chiedi del parcheggio e del giro in barca nella stessa telefonata. Verifica anche se il bonifico anticipato è già stato fatto.</div>
+</div>
+<div class="call">
+<div class="call-h"><span class="call-n">5</span><div class="call-w">Chiedere se fanno una visita venerdì nel tardo pomeriggio, e quanto costa</div>
+<div class="tools"><a class="tool" href="tel:+390882227643" title="Chiama Cantine D&#x27;Araprì, San Severo" aria-label="Chiama Cantine D&#x27;Araprì, San Severo">📞</a></div>
+</div>
+<div class="call-m">Cantine D&#x27;Araprì, San Severo · +39 0882 227643</div>
+<div class="call-d">Scadenza: <b>opzionale</b></div>
+<div class="call-y">Orari e prezzi non li pubblicano, e il numero viene da una directory, non dal loro sito: se non risponde, il pomeriggio di venerdì resta il centro storico a piedi. Non è una telefonata che blocca il viaggio.</div>
+</div>
+</div></details>
+<details class="intro"><summary>⚠️ I tre nodi di questo viaggio</summary><div class="intro-body">
+<p><b>1. Sabato sera il check-in a Corato è già chiuso.</b> B&amp;B La Dimora accetta arrivi fino alle 19:30, e alle 19:30 sei a Villa Santelia da mezz'ora. Va concordato al telefono: è la prima riga della lista qui sopra.</p>
+<p><b>2. Sabato fra le 11:00 e le 15:00 non hai una stanza.</b> Check-out dall'Angolo alle 11:00, arrivo in Cattedrale alle 15:00, e il letto successivo è a Corato, un'ora e venti più a sud. O ottieni il late check-out, o ti vesti prima delle 11:00. Il late check-out e la piscina della mattina del 26 valgono per Masseria Celentano, dove non dormi.</p>
+<p><b>3. Domenica l'auto è prenotata per le 13:00 e il volo parte alle 13:25.</b> I due orari non stanno insieme. Vale il volo: riconsegna verso mezzogiorno. Restituire in anticipo non costa penali, solo il tempo non rimborsato.</p>
+</div></details>
+<details class="intro"><summary>🚗 Guidare nel Gargano</summary><div class="intro-body"><p>Le distanze del Gargano non si leggono in chilometri. Le strade interne sono tornanti dentro il promontorio e la litoranea è a strapiombo: fra Vieste e l&#x27;aeroporto di Foggia ci sono 100 km ma quasi due ore, e fra Monte Sant&#x27;Angelo e Vieste 56 km fanno 1h10. Chi conta 80 km/h di media arriva sempre in ritardo. A fine settembre il sole va giù prima delle 19:00, e questi tornanti al buio sono un&#x27;altra cosa: se una tappa slitta, taglia la tappa, non il tempo di guida.</p></div></details>
+<details class="intro"><summary>🌡️ Come vestirsi a fine settembre</summary><div class="intro-body"><p>Medie storiche 1991–2020: costa adriatica (Bari) 16,5–26,2 °C, Tavoliere di Foggia 15,6–27,6 °C, Monte Sant&#x27;Angelo a 800 metri 14,2–20,9 °C. Il mare sta sui 23,5 °C, ancora ottimo per il bagno. Sono medie storiche, non previsioni: servono per decidere cosa mettere in valigia. Le due cose che sorprendono: sull&#x27;altopiano di Monte Sant&#x27;Angelo la massima media è sei gradi più bassa che sulla costa, e nella seconda metà del mese arrivano i primi peggioramenti.</p></div></details>
+<details class="intro"><summary>🅿️ ZTL e parcheggi</summary><div class="intro-body"><p>Il centro storico di San Severo è ZTL e la Cattedrale non si raggiunge in auto: per la cerimonia gli sposi indicheranno i parcheggi. L&#x27;Appartamento L&#x27;ANGOLO ha invece parcheggio pubblico gratuito in loco. A Vieste il B&amp;B Rossini non ha posto auto e in zona porto il parcheggio è a pagamento. A Corato il B&amp;B La Dimora ha un parcheggio privato gratuito, ma va prenotato.</p></div></details>
+<details class="intro"><summary>🍽️ Cosa si mangia da queste parti</summary><div class="intro-body"><p>Sul Gargano è pesce: il ciambotto di crostacei, lo spaghetto con i ricci, i troccoli. A San Severo si passa alla terra: pancotto, zuppetta sanseverese, olio di oliva peranzana, e il San Severo DOC — prima DOC della Puglia nel 1968, da Bombino Bianco e Nero di Troia. Sulle Murge, fra Corato e Andria, comandano le orecchiette con le cime di rapa e la burrata di Andria.</p></div></details>
+<details class="intro"><summary>🎟️ Le prenotazioni <span class="pill">7</span></summary><div class="intro-body">
+<div class="bk-r"><div class="bk-h"><b>Aeroporto di Foggia Gino Lisa</b><span class="pill ok">PRENOTATO</span></div>
+<div class="bk-m">XZ2227 · LIN → FOG</div>
+<div class="bk-m">2026-09-24 alle 13:20</div>
+<div class="bk-m">Conferma: sul telefono</div>
+<div class="warn"><b>🎟️</b> Orario modificato da Aeroitalia il 19 marzo 2026 per motivi operativi: vale questo, non quello della prenotazione originale.</div>
+</div>
+<div class="bk-r"><div class="bk-h"><b>Aeroporto di Foggia Gino Lisa</b><span class="pill ok">PRENOTATO</span></div>
+<div class="bk-m">XZ2226 · FOG → LIN</div>
+<div class="bk-m">2026-09-27 alle 13:25</div>
+<div class="bk-m">Conferma: sul telefono</div>
+<div class="warn"><b>🎟️</b> Orario modificato da Aeroitalia il 19 marzo 2026. Attenzione: la riconsegna auto è prenotata alle 13:00, cioè dopo la chiusura del check-in — riconsegna verso mezzogiorno.</div>
+</div>
+<div class="bk-r"><div class="bk-h"><b>Sicily By Car — Aeroporto di Foggia</b><span class="pill ok">PRENOTATO</span></div>
+<div class="bk-m">2026-09-24 alle 15:30</div>
+<div class="bk-m">Conferma: sul telefono</div>
+<div class="bk-m">Rif. fornitore: sul telefono</div>
+<div class="bk-m">Veicolo: Mini — Fiat Panda o similare, manuale, 4 posti, aria condizionata, km illimitati</div>
+<div class="bk-m">Ritiro: 2026-09-24 15:30 — Aeroporto di Foggia, al terminal</div>
+<div class="bk-m">Riconsegna: 2026-09-27 13:00 — Aeroporto di Foggia, al terminal</div>
+<div class="bk-m">Deposito: 200 € bloccati sulla carta di credito</div>
+<div class="bk-m">Franchigia: danni 1.464 € · furto 1.952 €, tasse incluse</div>
+<div class="bk-m">Carburante: Serbatoio allo stesso livello. Se manca carburante paghi il pieno più 42,70 € di servizio non rimborsabile.</div>
+<div class="warn"><b>🎟️</b> Al banco servono: carta di credito FISICA intestata al conducente (no prepagate, no virtuali), patente da almeno 12 mesi, documento d&#x27;identità dello stesso paese della patente, il voucher, un numero di telefono, l&#x27;indirizzo dell&#x27;alloggio e la copia del biglietto di ritorno. Se manca uno di questi possono rifiutare l&#x27;auto e applicare le penali di cancellazione.</div>
+</div>
+<div class="bk-r"><div class="bk-h"><b>B&amp;B Rossini</b><span class="pill ok">PRENOTATO</span></div>
+<div class="bk-m">2026-09-24</div>
+<div class="bk-m">Conferma: sul telefono</div>
+<div class="bk-m">PIN: ••••</div>
+<div class="bk-m">Camera: Camera Matrimoniale Deluxe</div>
+<div class="bk-m">Cancellazione: Gratuita fino al 16 settembre 2026 23:59. Dal 17 settembre: 72 €. Le date non si possono cambiare.</div>
+<div class="bk-m">€ 73,73 — 72 € + 5 € di tassa di soggiorno, meno 3,27 € di Bonus VIP Booking</div>
+<div class="warn"><b>🎟️</b> È richiesto il pagamento anticipato tramite bonifico bancario: la struttura contatta lei con le istruzioni. Verifica di averlo fatto.</div>
+</div>
+<div class="bk-r"><div class="bk-h"><b>Appartamento L&#x27;ANGOLO</b><span class="pill ok">PRENOTATO</span></div>
+<div class="bk-m">2026-09-25</div>
+<div class="bk-m">Conferma: sul telefono</div>
+<div class="bk-m">PIN: ••••</div>
+<div class="bk-m">Camera: Appartamento con 1 Camera da Letto</div>
+<div class="bk-m">Cancellazione: Gratuita fino al 22 settembre 2026 23:59. Dal 23 settembre: 56,70 €. Le date non si possono cambiare.</div>
+<div class="bk-m">€ 56,7 — 51,55 € + 5,15 € IVA, meno 2,58 € di Bonus VIP Booking</div>
+<div class="warn"><b>🎟️</b> Va comunicato in anticipo l&#x27;orario di arrivo. Al check-in servono documento con foto e carta di credito.</div>
+</div>
+<div class="bk-r"><div class="bk-h"><b>B&amp;B La Dimora</b><span class="pill ok">PRENOTATO</span></div>
+<div class="bk-m">2026-09-26</div>
+<div class="bk-m">Conferma: sul telefono</div>
+<div class="bk-m">PIN: ••••</div>
+<div class="bk-m">Camera: Camera Matrimoniale</div>
+<div class="bk-m">Cancellazione: Rimborso totale se cancelli entro il 11 settembre 2026 23:59. Dal 12 settembre nessun rimborso.</div>
+<div class="bk-m">€ 55 — 50 € + 5 € IVA</div>
+<div class="warn"><b>🎟️</b> ⚠️ Il check-in accettato è 00:00–19:30, ma il sabato sera sei al ricevimento: da concordare per telefono. Il parcheggio privato è gratuito ma va prenotato.</div>
+</div>
+<div class="bk-r"><div class="bk-h"><b>Tour delle grotte marine di Vieste</b><span class="pill warn">DA PRENOTARE</span></div>
+<div class="bk-m">2026-09-25 alle 09:00</div>
+<div class="bk-m">Ritrovo: Porto di Vieste, Molo Sud alle 08:30</div>
+<div class="bk-m">Cancellazione: Sulle piattaforme online: gratuita fino a 24 ore prima, rimborso totale.</div>
+<div class="bk-m">€ 60 — 30 € a persona per 2 persone</div>
+<div class="warn"><b>🎟️</b> DA PRENOTARE: servono almeno due giorni di anticipo, in alta stagione a volte una settimana. Online su freedome.it/attivita/tour-barca-vieste-grotte/ con conferma immediata, oppure al telefono con le motobarche di Vieste in Barca allo stesso prezzo.</div>
+</div>
+</div></details>
+<details class="intro"><summary>❓ Cosa manca ancora <span class="pill">4</span></summary><div class="intro-body">
+<p>· L&#x27;indirizzo della serata di venerdì a casa di AC, a San Severo, non è nei documenti: va chiesto agli sposi e messo sulla mappa.</p>
+<p>· Villa Santelia: il sito si contraddice fra la S.P. 231 Andria–Corato km 40 e Contrada Santa Maria a Trani. Sulla mappa è usata la seconda, che è quella del loro link Google Maps.</p>
+<p>· I parcheggi per la cerimonia in ZTL a San Severo li indicheranno gli sposi: l&#x27;informazione non è ancora arrivata.</p>
+<p>· Isole Tremiti da lunedì: gli sposi hanno aperto l&#x27;invito, ma il volo di ritorno è domenica alle 13:25. Andare vorrebbe dire cambiare il volo.</p>
+</div></details>
+<div class="day" id="d1" style="border-left:4px solid #546e7a">
+<div class="day-h" style="background:#546e7a">
+<div class="day-n">GIORNO 1</div>
+<div class="day-t">✈️ Arrivo, Tresoldi e il santuario nella roccia</div>
+<div class="day-m">giovedì 24 settembre &nbsp;·&nbsp; 🌅 06:44 – 🌇 18:51 &nbsp;·&nbsp; 🌡️ Media 17–26°C</div>
+</div><div class="day-b">
+<div class="day-area">🗺️ Manfredonia · Monte Sant&#x27;Angelo · Vieste</div>
+<div class="day-note">Giornata a incastro: hai l&#x27;auto alle 15:30 e il check-in a Vieste chiude alle 20:30. Nel mezzo ci stanno due tappe, ma solo se non ti allarghi. Le due ore di guida sono già contate.</div>
+<div class="ev chk" id="c1_0" data-ico="✈️">
+<button class="ev-box" onclick="tglChk('c1_0')" title="Segna come fatto" aria-label="Fatto: Volo Milano Linate → Foggia Gino Lisa">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 13:20 – 14:50</span>
+Volo Milano Linate → Foggia Gino Lisa
+</div>
+<div class="ev-note">Orario già modificato una volta da Aeroitalia: era un altro, questo è quello valido.</div>
+<div class="ev-note">💡 Scalo minuscolo: i tempi di un aeroporto grande qui non servono · Il banco dei noleggi è dentro il terminal, non con la navetta</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">XZ2227 · conferma sul telefono</div>
+<div class="warn"><b>🎟️</b> Orario modificato da Aeroitalia il 19 marzo 2026 per motivi operativi: vale questo, non quello della prenotazione originale.</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('aeroporto-foggia')" title="Mostra sulla mappa: Aeroporto di Foggia Gino Lisa" aria-label="Mostra sulla mappa: Aeroporto di Foggia Gino Lisa">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.42454,15.54763" target="_blank" rel="noopener" title="Apri in Google Maps: Aeroporto di Foggia Gino Lisa" aria-label="Apri in Google Maps: Aeroporto di Foggia Gino Lisa">📍</a></div>
+</div></div>
+<div class="ev chk" id="c1_1" data-ico="🚗">
+<button class="ev-box" onclick="tglChk('c1_1')" title="Segna come fatto" aria-label="Fatto: Sicily By Car — Aeroporto di Foggia">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 15:30 – 15:45</span>
+Sicily By Car — Aeroporto di Foggia
+</div>
+<div class="ev-note">🗺️ Foggia</div>
+<div class="ev-note">Banco del noleggio auto al terminal dell&#x27;aeroporto Gino Lisa, ritiro e riconsegna nello stesso punto.</div>
+<div class="ev-note">Metti in conto un quarto d&#x27;ora di pratiche: da qui in poi l&#x27;orario della giornata si conta da quando esci dal parcheggio, non da quando atterri.</div>
+<div class="ev-note">💡 Serve la carta di credito fisica intestata al conducente: né prepagate né virtuali · Serve anche copia del biglietto di ritorno e un indirizzo locale (il nome del B&amp;B basta) · Politica carburante: serbatoio allo stesso livello. Fotografa il livello al ritiro · Patente da almeno 12 mesi, minimo 19 anni</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">conferma sul telefono</div>
+<div class="warn"><b>🎟️</b> Al banco servono: carta di credito FISICA intestata al conducente (no prepagate, no virtuali), patente da almeno 12 mesi, documento d&#x27;identità dello stesso paese della patente, il voucher, un numero di telefono, l&#x27;indirizzo dell&#x27;alloggio e la copia del biglietto di ritorno. Se manca uno di questi possono rifiutare l&#x27;auto e applicare le penali di cancellazione.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390881025422" title="Chiama Sicily By Car — Aeroporto di Foggia" aria-label="Chiama Sicily By Car — Aeroporto di Foggia">📞</a><button class="tool" onclick="aFocus('sicily-by-car-foggia')" title="Mostra sulla mappa: Sicily By Car — Aeroporto di Foggia" aria-label="Mostra sulla mappa: Sicily By Car — Aeroporto di Foggia">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.42454,15.54763" target="_blank" rel="noopener" title="Apri in Google Maps: Sicily By Car — Aeroporto di Foggia" aria-label="Apri in Google Maps: Sicily By Car — Aeroporto di Foggia">📍</a></div>
+</div></div>
+<div class="ev chk" id="c1_2" data-ico="🏛️">
+<button class="ev-box" onclick="tglChk('c1_2')" title="Segna come fatto" aria-label="Fatto: Parco Archeologico di Siponto">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 16:45 – 17:35</span>
+Parco Archeologico di Siponto
+</div>
+<div class="ev-note">🗺️ Manfredonia</div>
+<div class="ev-note">Sulla basilica normanna di Santa Maria, Edoardo Tresoldi ha rialzato nel 2016 la chiesa paleocristiana scomparsa con 4.500 metri di rete metallica zincata: quattordici metri di edificio trasparente che si vede attraverso. Non è un rudere e non è una ricostruzione — è l&#x27;unica cosa del genere in Italia.</div>
+<div class="ev-note">56 minuti dall&#x27;aeroporto. Cinquanta minuti bastano, e arrivi nell&#x27;ora giusta per come è fatta quest&#x27;opera.</div>
+<div class="ev-meta">€ 5 · intero; ridotto 2 € (Comune di Manfredonia) · ~60 min</div>
+<div class="warn"><b>⚠️</b> Orari discordanti tra Comune di Manfredonia (mer–dom 10:30–19:30) e Artsupp (mar–dom 10:00–18:00). Il sito del Ministero rimanda alla biglietteria Aditus, che non li pubblica. Telefona o considera la chiusura più stretta, le 18:00.</div>
+<div class="ev-note">💡 L&#x27;installazione dà il meglio con la luce bassa del pomeriggio: la rete cambia densità secondo l&#x27;angolo · È a bordo strada sulla SS89, non nel centro di Manfredonia</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('parco-archeologico-siponto')" title="Mostra sulla mappa: Parco Archeologico di Siponto" aria-label="Mostra sulla mappa: Parco Archeologico di Siponto">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.60963,15.89099" target="_blank" rel="noopener" title="Apri in Google Maps: Parco Archeologico di Siponto" aria-label="Apri in Google Maps: Parco Archeologico di Siponto">📍</a><a class="tool" href="https://museipuglia.cultura.gov.it/musei/parco-archeologico-di-siponto/" target="_blank" rel="noopener" title="Sito di Parco Archeologico di Siponto" aria-label="Sito di Parco Archeologico di Siponto">🌐</a></div>
+</div></div>
+<div class="ev chk" id="c1_3" data-ico="⛪">
+<button class="ev-box" onclick="tglChk('c1_3')" title="Segna come fatto" aria-label="Fatto: Santuario di San Michele Arcangelo">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 18:05 – 18:55</span>
+Santuario di San Michele Arcangelo
+</div>
+<div class="ev-note">🗺️ Monte Sant&#x27;Angelo</div>
+<div class="ev-note">Patrimonio UNESCO, e non è una chiesa: è una grotta. Meta di pellegrinaggio da millecinquecento anni, la più antica dell&#x27;Occidente dedicata a San Michele, scavata nella roccia a 800 metri sopra il golfo di Manfredonia.</div>
+<div class="area-tour-block">
+⛪ Santuario di San Michele Arcangelo → 🏛️ Tomba di Rotari
+</div>
+<div class="ev-note">26 minuti da Siponto, in salita. Il tramonto è alle 18:51 e tu sei quassù: questa è l&#x27;ora buona, non un ripiego. Il santuario chiude alle 19:30, quindi cinquanta minuti ci stanno.</div>
+<div class="ev-meta">Gratis · Ingresso al santuario libero. Il sito non indica alcun costo. · ~60 min</div>
+<div class="ev-note">💡 Si scende una lunga scalinata dentro la roccia: scarpe chiuse, e dentro fa fresco anche d&#x27;estate · Sei a 800 metri: la massima media di settembre qui è 20,9 °C contro i 26 della costa, porta una felpa · La Tomba di Rotari è a cinquanta metri, si vedono insieme</div>
+<div class="ev-alt"><b>Alternativa:</b> Salta il santuario e vai diretto a Vieste — se il volo è in ritardo o l&#x27;auto si fa attendere: arriveresti a Vieste alle 19:00 invece che alle 20:05, con la luce</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390884561150" title="Chiama Santuario di San Michele Arcangelo" aria-label="Chiama Santuario di San Michele Arcangelo">📞</a><button class="tool" onclick="aFocus('santuario-san-michele')" title="Mostra sulla mappa: Santuario di San Michele Arcangelo" aria-label="Mostra sulla mappa: Santuario di San Michele Arcangelo">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.70816,15.95463" target="_blank" rel="noopener" title="Apri in Google Maps: Santuario di San Michele Arcangelo" aria-label="Apri in Google Maps: Santuario di San Michele Arcangelo">📍</a><a class="tool" href="https://www.santuariosanmichele.it/" target="_blank" rel="noopener" title="Sito di Santuario di San Michele Arcangelo" aria-label="Sito di Santuario di San Michele Arcangelo">🌐</a></div>
+</div></div>
+<div class="ev chk" id="c1_4" data-ico="🏠">
+<button class="ev-box" onclick="tglChk('c1_4')" title="Segna come fatto" aria-label="Fatto: B&amp;B Rossini">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 20:05 – 20:30</span>
+B&amp;B Rossini
+</div>
+<div class="ev-note">🗺️ Vieste</div>
+<div class="ev-note">B&amp;B nel cuore di Vieste, camera matrimoniale deluxe con balcone e vista mare. Colazione inclusa.</div>
+<div class="ev-note">68 minuti di tornanti da Monte Sant&#x27;Angelo, gli ultimi al buio. Hai 25 minuti di margine, non di più: se la giornata scivola, chiama invece di correre.</div>
+<div class="warn"><b>⚠️</b> Parcheggio non disponibile in struttura e nessuna connessione internet. Il check-in chiude alle 20:30.</div>
+<div class="ev-note">💡 Piani superiori accessibili solo a scale · Lo stesso numero di telefono risulta anche a Marina Vieste, il diportistico del porto: conviene chiedere a loro del parcheggio e della barca</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">conferma sul telefono · PIN •••• · € 73,73</div>
+<div class="ev-meta">Cancellazione: Gratuita fino al 16 settembre 2026 23:59. Dal 17 settembre: 72 €. Le date non si possono cambiare.</div>
+<div class="warn"><b>🎟️</b> È richiesto il pagamento anticipato tramite bonifico bancario: la struttura contatta lei con le istruzioni. Verifica di averlo fatto.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+393463039685" title="Chiama B&amp;B Rossini" aria-label="Chiama B&amp;B Rossini">📞</a><button class="tool" onclick="aFocus('bb-rossini-vieste')" title="Mostra sulla mappa: B&amp;B Rossini" aria-label="Mostra sulla mappa: B&amp;B Rossini">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.883483,16.170517" target="_blank" rel="noopener" title="Apri in Google Maps: B&amp;B Rossini" aria-label="Apri in Google Maps: B&amp;B Rossini">📍</a></div>
+</div></div>
+<div class="ev chk" id="c1_5" data-ico="🐟">
+<button class="ev-box" onclick="tglChk('c1_5')" title="Segna come fatto" aria-label="Fatto: Ristorante Acqua">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 21:00</span>
+Ristorante Acqua
+</div>
+<div class="ev-note">🗺️ Vieste — Centro storico</div>
+<div class="ev-note">Sala in un antico oleificio con la vista dall&#x27;alto sul porto. Chef Pasquale Pellegrino, pesce fresco.</div>
+<div class="ev-note">Prenota nel pomeriggio, mentre sei ancora in macchina: arrivi verso le 21:00 e a settembre Vieste è ancora piena.</div>
+<div class="warn"><b>⚠️</b> Orari, prezzi e telefono non verificati.</div>
+<div class="ev-alt"><b>Alternativa:</b> Ristorante La Ripa — se Acqua è pieno: dentro un convento del Quattrocento, dehors sotto la bouganville</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('la-ripa-vieste')" title="Mostra sulla mappa: Ristorante La Ripa" aria-label="Mostra sulla mappa: Ristorante La Ripa">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.88126,16.18173" target="_blank" rel="noopener" title="Apri in Google Maps: Ristorante La Ripa" aria-label="Apri in Google Maps: Ristorante La Ripa">📍</a></div>
+<div class="ev-alt"><b>Alternativa:</b> Filo d&#x27;olio — se vuoi solo mangiare e andare a dormire: bruschetteria, fave e cicorie, niente cerimonie</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('filo-dolio-vieste')" title="Mostra sulla mappa: Filo d&#x27;olio" aria-label="Mostra sulla mappa: Filo d&#x27;olio">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.8832,16.1786" target="_blank" rel="noopener" title="Apri in Google Maps: Filo d&#x27;olio" aria-label="Apri in Google Maps: Filo d&#x27;olio">📍</a></div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('ristorante-acqua-vieste')" title="Mostra sulla mappa: Ristorante Acqua" aria-label="Mostra sulla mappa: Ristorante Acqua">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.88534,16.17806" target="_blank" rel="noopener" title="Apri in Google Maps: Ristorante Acqua" aria-label="Apri in Google Maps: Ristorante Acqua">📍</a></div>
+</div></div>
+<div class="sleep"><div class="sleep-h">🛏️ Dove dormo</div>
+<div class="sleep-n">B&amp;B Rossini</div>
+<div class="sleep-m">🗺️ Via Gioacchino Rossini 27, 71019 Vieste (FG)</div>
+<div class="sleep-m">conferma sul telefono · PIN •••• · +39 346 303 9685</div>
+<div class="sleep-m">🕒 check-in 15:00–20:30 · check-out entro 10:30</div>
+<div class="sleep-w">⚠️ Parcheggio non disponibile in struttura e nessuna connessione internet. Il check-in chiude alle 20:30.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+393463039685" title="Chiama B&amp;B Rossini" aria-label="Chiama B&amp;B Rossini">📞</a><button class="tool" onclick="aFocus('bb-rossini-vieste')" title="Mostra sulla mappa: B&amp;B Rossini" aria-label="Mostra sulla mappa: B&amp;B Rossini">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.883483,16.170517" target="_blank" rel="noopener" title="Apri in Google Maps: B&amp;B Rossini" aria-label="Apri in Google Maps: B&amp;B Rossini">📍</a></div>
+</div>
+</div></div>
+<div class="day" id="d2" style="border-left:4px solid #0891b2">
+<div class="day-h" style="background:#0891b2">
+<div class="day-n">GIORNO 2</div>
+<div class="day-t">🚤 Le grotte dal mare, poi il Tavoliere</div>
+<div class="day-m">venerdì 25 settembre &nbsp;·&nbsp; 🌅 06:49 – 🌇 18:52 &nbsp;·&nbsp; 🌡️ Media 17–26°C</div>
+</div><div class="day-b">
+<div class="day-area">🗺️ Vieste · San Severo</div>
+<div class="day-note">Il giorno migliore del viaggio, e l&#x27;unico con un orario che non perdona: la barca parte alle 09:00 e il ritrovo è alle 08:30. Il check-out va fatto prima di imbarcarti, non dopo.</div>
+<div class="ev chk" id="c2_0" data-ico="🏠">
+<button class="ev-box" onclick="tglChk('c2_0')" title="Segna come fatto" aria-label="Fatto: Check-out dal B&amp;B Rossini">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 08:15</span>
+Check-out dal B&amp;B Rossini
+</div>
+<div class="ev-note">Prima della barca, non dopo: alle 10:30 — che è il limite — sei in mezzo al mare. Valigie in auto e via al porto. La colazione è inclusa: fattela prima.</div>
+<div class="warn"><b>⚠️</b> Parcheggio non disponibile in struttura e nessuna connessione internet. Il check-in chiude alle 20:30.</div>
+<div class="ev-note">💡 Piani superiori accessibili solo a scale · Lo stesso numero di telefono risulta anche a Marina Vieste, il diportistico del porto: conviene chiedere a loro del parcheggio e della barca</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+393463039685" title="Chiama B&amp;B Rossini" aria-label="Chiama B&amp;B Rossini">📞</a><button class="tool" onclick="aFocus('bb-rossini-vieste')" title="Mostra sulla mappa: B&amp;B Rossini" aria-label="Mostra sulla mappa: B&amp;B Rossini">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.883483,16.170517" target="_blank" rel="noopener" title="Apri in Google Maps: B&amp;B Rossini" aria-label="Apri in Google Maps: B&amp;B Rossini">📍</a></div>
+</div></div>
+<div class="ev chk" id="c2_1" data-ico="🚤">
+<button class="ev-box" onclick="tglChk('c2_1')" title="Segna come fatto" aria-label="Fatto: Tour delle grotte marine di Vieste">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 08:30 – 12:00</span>
+Tour delle grotte marine di Vieste
+</div>
+<div class="ev-note">🗺️ Vieste</div>
+<div class="ev-note">Tre ore di motobarca lungo la costa sud del Gargano, dodici miglia di litorale: si passa sotto il monolite di Pizzomunno e si entra nella Grotta Sfondata, nella Grotta dei Colori, nella Grotta dei Pomodori e nella Grotta dei Sogni, si attraversa l&#x27;Arco di Porto Greco e si arriva alla Baia delle Zagare. Un&#x27;ora di sosta bagno alla Baia dei Gabbiani.</div>
+<div class="area-tour-block">
+🌊 Pizzomunno → 🏖️ Baia di Vignanotica → 🏖️ Baia delle Zagare (Baia dei Mergoli)
+</div>
+<div class="ev-note">Ritrovo alle 08:30, non alle 09:00: chi arriva dopo la partenza non viene rimborsato. Costume e crema addosso da subito, non in valigia.</div>
+<div class="ev-meta">€ 30 a persona · adulti 30 €, bambini 3–10 anni 15 €, sotto i 3 anni gratis. Vieste Sea Adventure fa lo stesso giro in gruppo di max 10 persone a circa 70 $. · ~180 min</div>
+<div class="ev-note">💡 Va prenotato con almeno due giorni di anticipo in alta stagione, a volte una settimana · Il ritrovo è 30 minuti prima: chi arriva dopo la partenza non viene rimborsato · Rimborso totale se non si parte per maltempo, ma nessun rimborso se il tempo peggiora a metà giro · Il mare a settembre sta sui 23,5 °C: il costume serve davvero · Cancellazione gratuita fino a 24 ore prima sulle piattaforme online</div>
+<div class="ev-bk pending">🎟️ DA PRENOTARE</div>
+<div class="ev-meta">€ 60</div>
+<div class="ev-meta">Cancellazione: Sulle piattaforme online: gratuita fino a 24 ore prima, rimborso totale.</div>
+<div class="warn"><b>🎟️</b> DA PRENOTARE: servono almeno due giorni di anticipo, in alta stagione a volte una settimana. Online su freedome.it/attivita/tour-barca-vieste-grotte/ con conferma immediata, oppure al telefono con le motobarche di Vieste in Barca allo stesso prezzo.</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('tour-grotte-marine-vieste')" title="Mostra sulla mappa: Tour delle grotte marine di Vieste" aria-label="Mostra sulla mappa: Tour delle grotte marine di Vieste">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.8822,16.1672" target="_blank" rel="noopener" title="Apri in Google Maps: Tour delle grotte marine di Vieste" aria-label="Apri in Google Maps: Tour delle grotte marine di Vieste">📍</a><a class="tool" href="https://freedome.it/attivita/tour-barca-vieste-grotte/" target="_blank" rel="noopener" title="Prenota Tour delle grotte marine di Vieste" aria-label="Prenota Tour delle grotte marine di Vieste">🎟️</a></div>
+</div></div>
+<div class="ev chk" id="c2_2" data-ico="🍽️">
+<button class="ev-box" onclick="tglChk('c2_2')" title="Segna come fatto" aria-label="Fatto: Enoteca Vesta">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 12:30 – 14:00</span>
+Enoteca Vesta
+</div>
+<div class="ev-note">🗺️ Vieste — Centro storico</div>
+<div class="ev-note">Ristorante-enoteca ricavato in una grotta in pieno centro storico, indicato come il riferimento più affidabile della città.</div>
+<div class="ev-note">Il pranzo lungo che hai scelto, senza fretta: sei appena scesa dalla barca e il pomeriggio è solo guida. Spaghetto con i ricci, troccoli ai ceci, ciambotto di crostacei.</div>
+<div class="warn"><b>⚠️</b> Posizione approssimativa: la fonte dice solo «una grotta nel centro storico», l&#x27;indirizzo civico non è pubblicato. Orari, prezzi e telefono non verificati.</div>
+<div class="ev-alt"><b>Alternativa:</b> Il Capriccio — se vuoi restare sul molo fra le barche invece di risalire in centro</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('il-capriccio-vieste')" title="Mostra sulla mappa: Il Capriccio" aria-label="Mostra sulla mappa: Il Capriccio">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.8824,16.1676" target="_blank" rel="noopener" title="Apri in Google Maps: Il Capriccio" aria-label="Apri in Google Maps: Il Capriccio">📍</a></div>
+<div class="ev-alt"><b>Alternativa:</b> Donlù — se dopo tre ore di sole basta un aperitivo lungo e non un pranzo</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('donlu-vieste')" title="Mostra sulla mappa: Donlù" aria-label="Mostra sulla mappa: Donlù">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.8828,16.1795" target="_blank" rel="noopener" title="Apri in Google Maps: Donlù" aria-label="Apri in Google Maps: Donlù">📍</a></div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('enoteca-vesta-vieste')" title="Mostra sulla mappa: Enoteca Vesta" aria-label="Mostra sulla mappa: Enoteca Vesta">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.883,16.179" target="_blank" rel="noopener" title="Apri in Google Maps: Enoteca Vesta" aria-label="Apri in Google Maps: Enoteca Vesta">📍</a></div>
+</div></div>
+<div class="ev chk" id="c2_3" data-ico="🚗">
+<button class="ev-box" onclick="tglChk('c2_3')" title="Segna come fatto" aria-label="Fatto: Vieste → San Severo in auto">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 14:15 – 16:05</span>
+Vieste → San Severo in auto
+</div>
+<div class="ev-note">106 km e 1h49 reali, non un&#x27;ora: sono tornanti dentro il Gargano fino a Foggia, poi pianura. Se vuoi allungare, Monte Sant&#x27;Angelo e San Giovanni Rotondo sono su questa strada — ma aggiungono mezz&#x27;ora di sola guida e stasera hai la festa.</div>
+
+</div></div>
+<div class="ev chk" id="c2_4" data-ico="🏠">
+<button class="ev-box" onclick="tglChk('c2_4')" title="Segna come fatto" aria-label="Fatto: Appartamento L&#x27;ANGOLO">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 16:15</span>
+Appartamento L&#x27;ANGOLO
+</div>
+<div class="ev-note">🗺️ San Severo — Centro storico</div>
+<div class="ev-note">Appartamento con una camera al piano terra, ingresso privato, cucina attrezzata e lavatrice, nel centro storico di San Severo a pochi passi dalla Cattedrale.</div>
+<div class="ev-note">Appena entri, tira fuori l&#x27;abito di domani e stiralo adesso: domattina hai il check-out alle 11:00 e la testa altrove.</div>
+<div class="warn"><b>⚠️</b> Connessione internet non disponibile. Nessun pasto incluso.</div>
+<div class="ev-note">💡 Parcheggio pubblico gratuito in loco, senza prenotare · Va comunicato in anticipo l&#x27;orario di arrivo · C&#x27;è il ferro da stiro: utile se l&#x27;abito da cerimonia arriva in valigia</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">conferma sul telefono · PIN •••• · € 56,7</div>
+<div class="ev-meta">Cancellazione: Gratuita fino al 22 settembre 2026 23:59. Dal 23 settembre: 56,70 €. Le date non si possono cambiare.</div>
+<div class="warn"><b>🎟️</b> Va comunicato in anticipo l&#x27;orario di arrivo. Al check-in servono documento con foto e carta di credito.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+393886573748" title="Chiama Appartamento L&#x27;ANGOLO" aria-label="Chiama Appartamento L&#x27;ANGOLO">📞</a><button class="tool" onclick="aFocus('appartamento-langolo-san-severo')" title="Mostra sulla mappa: Appartamento L&#x27;ANGOLO" aria-label="Mostra sulla mappa: Appartamento L&#x27;ANGOLO">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.682933,15.381083" target="_blank" rel="noopener" title="Apri in Google Maps: Appartamento L&#x27;ANGOLO" aria-label="Apri in Google Maps: Appartamento L&#x27;ANGOLO">📍</a></div>
+</div></div>
+<div class="ev chk" id="c2_5" data-ico="🍷">
+<button class="ev-box" onclick="tglChk('c2_5')" title="Segna come fatto" aria-label="Fatto: Cantine D&#x27;Araprì">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 17:15 – 18:30</span>
+Cantine D&#x27;Araprì
+</div>
+<div class="ev-note">🗺️ San Severo — Centro storico</div>
+<div class="ev-note">I pionieri del Metodo Classico in Puglia: spumanti da Bombino Bianco che maturano nei sotterranei settecenteschi sotto il centro storico di San Severo. Le visite passano dai cunicoli scavati nel tufo.</div>
+<div class="ev-note">Da chiamare prima, perché orari e prezzi non li pubblicano. Un&#x27;ora e un quarto è quanto ci sta senza mangiare il tempo della serata.</div>
+<div class="warn"><b>⚠️</b> Posizione a livello di strada, civico non geolocalizzato. Telefono e indirizzo vengono da directory di terze parti, non dal sito ufficiale: verificali chiamando. Orari e costo delle visite non pubblicati.</div>
+<div class="ev-note">💡 In cantina ci sono 12–14 °C: porta qualcosa sopra anche a settembre · Le visite si fanno in italiano, inglese e spagnolo, e vanno prenotate · Il vino della zona è il San Severo DOC, prima DOC della Puglia nel 1968</div>
+<div class="ev-alt"><b>Alternativa:</b> Il centro storico a piedi — se D&#x27;Araprì non risponde o non fa visite: la Cattedrale, San Lorenzo delle Benedettine e il Teatro Verdi stanno in trecento metri, tutti da Via Cavour</div>
+<div class="ev-alt"><b>Alternativa:</b> Riposo e nient&#x27;altro — hai fatto tre ore di barca e due di guida, e stasera si va a letto tardi</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390882227643" title="Chiama Cantine D&#x27;Araprì" aria-label="Chiama Cantine D&#x27;Araprì">📞</a><button class="tool" onclick="aFocus('cantine-darapri')" title="Mostra sulla mappa: Cantine D&#x27;Araprì" aria-label="Mostra sulla mappa: Cantine D&#x27;Araprì">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.68611,15.38403" target="_blank" rel="noopener" title="Apri in Google Maps: Cantine D&#x27;Araprì" aria-label="Apri in Google Maps: Cantine D&#x27;Araprì">📍</a><a class="tool" href="https://darapri.it/tour/" target="_blank" rel="noopener" title="Sito di Cantine D&#x27;Araprì" aria-label="Sito di Cantine D&#x27;Araprì">🌐</a></div>
+</div></div>
+<div class="ev chk" id="c2_6" data-ico="🎉">
+<button class="ev-box" onclick="tglChk('c2_6')" title="Segna come fatto" aria-label="Fatto: Serata a casa di AC, San Severo">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 20:00</span>
+Serata a casa di AC, San Severo
+</div>
+<div class="ev-note">«Buon cibo, buona musica e ottima compagnia per entrare nel mood del weekend»: gli sposi la danno per non mancabile. ⚠️ L&#x27;indirizzo non è nei documenti: chiedilo e mettilo sulla mappa.</div>
+
+</div></div>
+<div class="sleep"><div class="sleep-h">🛏️ Dove dormo</div>
+<div class="sleep-n">Appartamento L&#x27;ANGOLO</div>
+<div class="sleep-m">🗺️ Via Cavour 34, 71016 San Severo (FG)</div>
+<div class="sleep-m">conferma sul telefono · PIN •••• · +39 388 657 3748</div>
+<div class="sleep-m">🕒 check-in dalle 15:00 · check-out entro 11:00</div>
+<div class="sleep-w">⚠️ Connessione internet non disponibile. Nessun pasto incluso.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+393886573748" title="Chiama Appartamento L&#x27;ANGOLO" aria-label="Chiama Appartamento L&#x27;ANGOLO">📞</a><button class="tool" onclick="aFocus('appartamento-langolo-san-severo')" title="Mostra sulla mappa: Appartamento L&#x27;ANGOLO" aria-label="Mostra sulla mappa: Appartamento L&#x27;ANGOLO">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.682933,15.381083" target="_blank" rel="noopener" title="Apri in Google Maps: Appartamento L&#x27;ANGOLO" aria-label="Apri in Google Maps: Appartamento L&#x27;ANGOLO">📍</a></div>
+</div>
+</div></div>
+<div class="day" id="d3" style="border-left:4px solid #7c3aed">
+<div class="day-h" style="background:#7c3aed">
+<div class="day-n">GIORNO 3</div>
+<div class="day-t">💍 Il grande giorno</div>
+<div class="day-m">sabato 26 settembre &nbsp;·&nbsp; 🌅 06:46 – 🌇 18:46 &nbsp;·&nbsp; 🌡️ Media 17–26°C</div>
+</div><div class="day-b">
+<div class="day-area">🗺️ San Severo · Villa Santelia</div>
+<div class="day-note">Il giorno per cui sei venuto. Due vincoli veri: alle 16:00 la cerimonia comincia (il parroco è stato citato esplicitamente) e alle 11:00 scade il check-out. Fra i due c&#x27;è il buco in cui devi vestirti.</div>
+<div class="ev chk" id="c3_0" data-ico="☕">
+<button class="ev-box" onclick="tglChk('c3_0')" title="Segna come fatto" aria-label="Fatto: Colazione e il centro storico di San Severo">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 09:00 – 10:30</span>
+Colazione e il centro storico di San Severo
+</div>
+<div class="area-tour-block">
+⛪ Cattedrale di San Severo → ⛪ Chiesa di San Lorenzo delle Benedettine → 🏛️ Teatro Giuseppe Verdi
+</div>
+<div class="ev-note">Tutto in trecento metri da Via Cavour: la Cattedrale dove ci si sposa fra sei ore, San Lorenzo delle Benedettine con la facciata rococò in marmo di Apricena, il Teatro Verdi. Serve anche a capire dove sarà il parcheggio nel pomeriggio.</div>
+<div class="ev-alt"><b>Alternativa:</b> Dormire e nient&#x27;altro — ieri sera si è fatto tardi e stasera si fa peggio</div>
+
+</div></div>
+<div class="ev chk" id="c3_1" data-ico="🏠">
+<button class="ev-box" onclick="tglChk('c3_1')" title="Segna come fatto" aria-label="Fatto: Check-out dall&#x27;Appartamento L&#x27;ANGOLO">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 11:00</span>
+Check-out dall&#x27;Appartamento L&#x27;ANGOLO
+</div>
+<div class="ev-note">⚠️ Se hai ottenuto il late check-out, questa è l&#x27;ora in cui vestirsi con calma. Se non l&#x27;hai ottenuto, vestiti PRIMA delle 11:00: il prossimo posto tuo è a Corato, a un&#x27;ora e mezza da qui, e non ci passi prima della cerimonia.</div>
+<div class="warn"><b>⚠️</b> Connessione internet non disponibile. Nessun pasto incluso.</div>
+<div class="ev-note">💡 Parcheggio pubblico gratuito in loco, senza prenotare · Va comunicato in anticipo l&#x27;orario di arrivo · C&#x27;è il ferro da stiro: utile se l&#x27;abito da cerimonia arriva in valigia</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+393886573748" title="Chiama Appartamento L&#x27;ANGOLO" aria-label="Chiama Appartamento L&#x27;ANGOLO">📞</a><button class="tool" onclick="aFocus('appartamento-langolo-san-severo')" title="Mostra sulla mappa: Appartamento L&#x27;ANGOLO" aria-label="Mostra sulla mappa: Appartamento L&#x27;ANGOLO">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.682933,15.381083" target="_blank" rel="noopener" title="Apri in Google Maps: Appartamento L&#x27;ANGOLO" aria-label="Apri in Google Maps: Appartamento L&#x27;ANGOLO">📍</a></div>
+</div></div>
+<div class="ev chk" id="c3_2" data-ico="🍽️">
+<button class="ev-box" onclick="tglChk('c3_2')" title="Segna come fatto" aria-label="Fatto: Pranzo leggero a San Severo">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 12:30 – 14:00</span>
+Pranzo leggero a San Severo
+</div>
+<div class="ev-note">Leggero per un motivo pratico: alle 16:00 cominci una giornata che finisce a notte, con un ricevimento nel mezzo. Nel centro storico i bar e le trattorie ci sono; non ne ho uno verificato da consigliarti per nome, quindi scegli sul posto invece di fidarti di un indirizzo che non ho controllato.</div>
+
+</div></div>
+<div class="ev chk" id="c3_3" data-ico="⛪">
+<button class="ev-box" onclick="tglChk('c3_3')" title="Segna come fatto" aria-label="Fatto: Cattedrale di San Severo">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 15:00 – 15:30</span>
+Cattedrale di San Severo
+</div>
+<div class="ev-note">🗺️ San Severo — Centro storico</div>
+<div class="ev-note">La chiesa madre di San Severo, nel centro storico. Impianto romanico rimaneggiato in barocco dopo il terremoto del 1627.</div>
+<div class="ev-note">Gli sposi chiedono di arrivare fra le 15:00 e le 15:30. Centro storico in ZTL: davanti alla Cattedrale in auto non ci arrivi, i parcheggi li indicheranno loro.</div>
+<div class="warn"><b>⚠️</b> Zona a traffico limitato: in auto non ci si arriva davanti. Orari di apertura non verificati.</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('cattedrale-san-severo')" title="Mostra sulla mappa: Cattedrale di San Severo" aria-label="Mostra sulla mappa: Cattedrale di San Severo">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.68519,15.38044" target="_blank" rel="noopener" title="Apri in Google Maps: Cattedrale di San Severo" aria-label="Apri in Google Maps: Cattedrale di San Severo">📍</a></div>
+</div></div>
+<div class="ev chk" id="c3_4" data-ico="⛪">
+<button class="ev-box" onclick="tglChk('c3_4')" title="Segna come fatto" aria-label="Fatto: ⛪ Cerimonia">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 16:00 – 17:15</span>
+⛪ Cerimonia
+</div>
+<div class="ev-note">Inizio alle 16:00, puntuali — sono parole degli sposi, con il parroco a garanzia.</div>
+<div class="warn"><b>⚠️</b> Zona a traffico limitato: in auto non ci si arriva davanti. Orari di apertura non verificati.</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('cattedrale-san-severo')" title="Mostra sulla mappa: Cattedrale di San Severo" aria-label="Mostra sulla mappa: Cattedrale di San Severo">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.68519,15.38044" target="_blank" rel="noopener" title="Apri in Google Maps: Cattedrale di San Severo" aria-label="Apri in Google Maps: Cattedrale di San Severo">📍</a></div>
+</div></div>
+<div class="ev chk" id="c3_5" data-ico="🚗">
+<button class="ev-box" onclick="tglChk('c3_5')" title="Segna come fatto" aria-label="Fatto: San Severo → Villa Santelia in auto">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 17:20 – 18:45</span>
+San Severo → Villa Santelia in auto
+</div>
+<div class="ev-note">123 km e 1h22 reali. Gli sposi dicono «~1h» e «partite senza indugiare per godervi il tramonto»: il tramonto è alle 18:46, quindi hanno ragione — se esci dalla Cattedrale alle 17:20 arrivi giusto. Ogni quarto d&#x27;ora perso qui è un quarto d&#x27;ora di luce perso là.</div>
+
+</div></div>
+<div class="ev chk" id="c3_6" data-ico="🏛️">
+<button class="ev-box" onclick="tglChk('c3_6')" title="Segna come fatto" aria-label="Fatto: Villa Santelia">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 19:00</span>
+Villa Santelia
+</div>
+<div class="ev-note">🗺️ Campagna fra Andria e Corato</div>
+<div class="ev-note">Dimora storica settecentesca in pietra di Trani, fra ulivi secolari nella campagna tra Andria e Corato. È la location del ricevimento.</div>
+<div class="ev-note">Festa fino a tarda notte. Il letto è a dieci minuti da qui, e questo è il momento in cui serve che la telefonata al B&amp;B sia stata fatta.</div>
+<div class="warn"><b>⚠️</b> Il sito della villa si contraddice: il footer indica la S.P. 231 Andria–Corato km 40, il link mappa punta a Contrada Santa Maria, 76125 Trani (41.179048, 16.361101). Qui è usata la coordinata della mappa. Conferma con la struttura o con gli sposi.</div>
+<div class="ev-note">💡 Un secondo numero, anche WhatsApp: +39 328 942 8620</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390883501999" title="Chiama Villa Santelia" aria-label="Chiama Villa Santelia">📞</a><button class="tool" onclick="aFocus('villa-santelia')" title="Mostra sulla mappa: Villa Santelia" aria-label="Mostra sulla mappa: Villa Santelia">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.179048,16.361101" target="_blank" rel="noopener" title="Apri in Google Maps: Villa Santelia" aria-label="Apri in Google Maps: Villa Santelia">📍</a><a class="tool" href="https://villasantelia.it/" target="_blank" rel="noopener" title="Sito di Villa Santelia" aria-label="Sito di Villa Santelia">🌐</a></div>
+</div></div>
+<div class="ev chk" id="c3_7" data-ico="🏠">
+<button class="ev-box" onclick="tglChk('c3_7')" title="Segna come fatto" aria-label="Fatto: B&amp;B La Dimora">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 23:59</span>
+B&amp;B La Dimora
+</div>
+<div class="ev-note">🗺️ Corato</div>
+<div class="ev-note">Camera matrimoniale con bagno privato a Corato, a dieci minuti d&#x27;auto dalla campagna fra Andria e Corato.</div>
+<div class="ev-note">⚠️ Solo 6,6 km e 10 minuti da Villa Santelia — è il motivo per cui Corato era la scelta giusta. MA il check-in chiude alle 19:30: se non hai concordato l&#x27;arrivo tardivo, questa riga non funziona. È la prima telefonata della lista.</div>
+<div class="warn"><b>⚠️</b> Il check-in chiude alle 19:30 e il parcheggio privato va prenotato in anticipo. Piani superiori solo a scale.</div>
+<div class="ev-note">💡 Parcheggio privato gratuito ma su prenotazione: chiedilo quando chiami · L&#x27;uso della cucina costa 10 € al giorno e va chiesto prima, i kit sono pochi</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">conferma sul telefono · PIN •••• · € 55</div>
+<div class="ev-meta">Cancellazione: Rimborso totale se cancelli entro il 11 settembre 2026 23:59. Dal 12 settembre nessun rimborso.</div>
+<div class="warn"><b>🎟️</b> ⚠️ Il check-in accettato è 00:00–19:30, ma il sabato sera sei al ricevimento: da concordare per telefono. Il parcheggio privato è gratuito ma va prenotato.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390808722153" title="Chiama B&amp;B La Dimora" aria-label="Chiama B&amp;B La Dimora">📞</a><button class="tool" onclick="aFocus('bb-la-dimora-corato')" title="Mostra sulla mappa: B&amp;B La Dimora" aria-label="Mostra sulla mappa: B&amp;B La Dimora">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.153567,16.410583" target="_blank" rel="noopener" title="Apri in Google Maps: B&amp;B La Dimora" aria-label="Apri in Google Maps: B&amp;B La Dimora">📍</a></div>
+</div></div>
+<div class="sleep"><div class="sleep-h">🛏️ Dove dormo</div>
+<div class="sleep-n">B&amp;B La Dimora</div>
+<div class="sleep-m">🗺️ Via Gisotti 4, 70033 Corato (BA)</div>
+<div class="sleep-m">conferma sul telefono · PIN •••• · +39 080 872 2153</div>
+<div class="sleep-m">🕒 check-in fino alle 19:30 · check-out 07:00–10:30</div>
+<div class="sleep-w">⚠️ Il check-in chiude alle 19:30 e il parcheggio privato va prenotato in anticipo. Piani superiori solo a scale.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390808722153" title="Chiama B&amp;B La Dimora" aria-label="Chiama B&amp;B La Dimora">📞</a><button class="tool" onclick="aFocus('bb-la-dimora-corato')" title="Mostra sulla mappa: B&amp;B La Dimora" aria-label="Mostra sulla mappa: B&amp;B La Dimora">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.153567,16.410583" target="_blank" rel="noopener" title="Apri in Google Maps: B&amp;B La Dimora" aria-label="Apri in Google Maps: B&amp;B La Dimora">📍</a></div>
+</div>
+</div></div>
+<div class="day" id="d4" style="border-left:4px solid #dc2626">
+<div class="day-h" style="background:#dc2626">
+<div class="day-n">GIORNO 4</div>
+<div class="day-t">🛫 Rientro da Foggia</div>
+<div class="day-m">domenica 27 settembre &nbsp;·&nbsp; 🌅 06:50 – 🌇 18:48 &nbsp;·&nbsp; 🌡️ Media 17–26°C</div>
+</div><div class="day-b">
+<div class="day-area">🗺️ Corato · Foggia</div>
+<div class="day-note">Giornata di solo rientro, come hai scelto. L&#x27;unica cosa da sapere è che il voucher dell&#x27;auto dice 13:00 e il volo parte alle 13:25: quei due orari non stanno insieme, quindi vale il volo.</div>
+<div class="ev chk" id="c4_0" data-ico="☕">
+<button class="ev-box" onclick="tglChk('c4_0')" title="Segna come fatto" aria-label="Fatto: Colazione a Corato e valigie">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 09:30 – 10:30</span>
+Colazione a Corato e valigie
+</div>
+<div class="ev-note">La colazione del B&amp;B è a pagamento e soggetta a disponibilità: i bar di Corato sono l&#x27;alternativa. Il check-out chiude alle 10:30, quindi la sveglia è comunque obbligata.</div>
+
+</div></div>
+<div class="ev chk" id="c4_1" data-ico="🚗">
+<button class="ev-box" onclick="tglChk('c4_1')" title="Segna come fatto" aria-label="Fatto: Corato → Aeroporto di Foggia in auto">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 10:30 – 11:55</span>
+Corato → Aeroporto di Foggia in auto
+</div>
+<div class="ev-note">98 km e 1h25. Partire alle 10:30 non è prudenza eccessiva: è l&#x27;ora in cui ti buttano fuori dal B&amp;B comunque.</div>
+<div class="ev-alt"><b>Alternativa:</b> Cattedrale di Trani — se vi svegliate presto e volete salutare gli altri: Trani è a 18 minuti da Corato, con la cattedrale sullo scoglio e il mare su tre lati. Ma è nella direzione opposta all&#x27;aeroporto: aggiunge circa 40 minuti al totale e va deciso a colazione, non in strada</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('cattedrale-di-trani')" title="Mostra sulla mappa: Cattedrale di Trani" aria-label="Mostra sulla mappa: Cattedrale di Trani">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.28221,16.41848" target="_blank" rel="noopener" title="Apri in Google Maps: Cattedrale di Trani" aria-label="Apri in Google Maps: Cattedrale di Trani">📍</a></div>
+
+</div></div>
+<div class="ev chk" id="c4_2" data-ico="🚗">
+<button class="ev-box" onclick="tglChk('c4_2')" title="Segna come fatto" aria-label="Fatto: Sicily By Car — Aeroporto di Foggia">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 11:55 – 12:15</span>
+Sicily By Car — Aeroporto di Foggia
+</div>
+<div class="ev-note">🗺️ Foggia</div>
+<div class="ev-note">Banco del noleggio auto al terminal dell&#x27;aeroporto Gino Lisa, ritiro e riconsegna nello stesso punto.</div>
+<div class="ev-note">⚠️ Il voucher dice riconsegna alle 13:00, ma il volo parte alle 13:25 e il check-in chiude prima: riconsegna verso mezzogiorno. Restituire l&#x27;auto in anticipo non comporta penali, solo nessun rimborso del tempo. Rimetti il carburante al livello del ritiro: altrimenti pagano loro il pieno, più 42,70 € di servizio.</div>
+<div class="ev-note">💡 Serve la carta di credito fisica intestata al conducente: né prepagate né virtuali · Serve anche copia del biglietto di ritorno e un indirizzo locale (il nome del B&amp;B basta) · Politica carburante: serbatoio allo stesso livello. Fotografa il livello al ritiro · Patente da almeno 12 mesi, minimo 19 anni</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">conferma sul telefono</div>
+<div class="warn"><b>🎟️</b> Al banco servono: carta di credito FISICA intestata al conducente (no prepagate, no virtuali), patente da almeno 12 mesi, documento d&#x27;identità dello stesso paese della patente, il voucher, un numero di telefono, l&#x27;indirizzo dell&#x27;alloggio e la copia del biglietto di ritorno. Se manca uno di questi possono rifiutare l&#x27;auto e applicare le penali di cancellazione.</div>
+<div class="ev-tools tools"><a class="tool" href="tel:+390881025422" title="Chiama Sicily By Car — Aeroporto di Foggia" aria-label="Chiama Sicily By Car — Aeroporto di Foggia">📞</a><button class="tool" onclick="aFocus('sicily-by-car-foggia')" title="Mostra sulla mappa: Sicily By Car — Aeroporto di Foggia" aria-label="Mostra sulla mappa: Sicily By Car — Aeroporto di Foggia">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.42454,15.54763" target="_blank" rel="noopener" title="Apri in Google Maps: Sicily By Car — Aeroporto di Foggia" aria-label="Apri in Google Maps: Sicily By Car — Aeroporto di Foggia">📍</a></div>
+</div></div>
+<div class="ev chk" id="c4_3" data-ico="✈️">
+<button class="ev-box" onclick="tglChk('c4_3')" title="Segna come fatto" aria-label="Fatto: Volo Foggia Gino Lisa → Milano Linate">✓</button><div style="flex:1">
+<div class="ev-n">
+<span class="ev-when">⏰ 13:25 – 14:55</span>
+Volo Foggia Gino Lisa → Milano Linate
+</div>
+<div class="ev-note">💡 Scalo minuscolo: i tempi di un aeroporto grande qui non servono · Il banco dei noleggi è dentro il terminal, non con la navetta</div>
+<div class="ev-bk ok">🎟️ PRENOTATO</div>
+<div class="ev-meta">XZ2226 · conferma sul telefono</div>
+<div class="warn"><b>🎟️</b> Orario modificato da Aeroitalia il 19 marzo 2026. Attenzione: la riconsegna auto è prenotata alle 13:00, cioè dopo la chiusura del check-in — riconsegna verso mezzogiorno.</div>
+<div class="ev-tools tools"><button class="tool" onclick="aFocus('aeroporto-foggia')" title="Mostra sulla mappa: Aeroporto di Foggia Gino Lisa" aria-label="Mostra sulla mappa: Aeroporto di Foggia Gino Lisa">🧭</button><a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query=41.42454,15.54763" target="_blank" rel="noopener" title="Apri in Google Maps: Aeroporto di Foggia Gino Lisa" aria-label="Apri in Google Maps: Aeroporto di Foggia Gino Lisa">📍</a></div>
+</div></div>
+</div></div>
+<!-- END DAY CARDS -->
+<footer>Generato da <code>build_puglia.py</code> il 2026-08-30 dai dati di <code>library/puglia.json</code> e <code>trips/puglia-2026.json</code>.<br>Orari, prezzi e telefoni vengono dalle fonti citate in libreria: dove le fonti non concordano c'è un avviso in ambra, dove non ho un dato non l'ho inventato.<br>Temperature: medie storiche 1991–2020 (Climates to Travel). Alba e tramonto: calcolati. Nessuna previsione meteo.</footer>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var PL=[{"id":"aeroporto-foggia","n":"Aeroporto di Foggia Gino Lisa","lat":41.42454,"lng":15.54763,"ty":"transport_hub","ic":"✈️","d":"Lo scalo di Foggia, piccolo e a un passo dalla città. Un solo terminal: dal gate al banco del noleggio si va a piedi in pochi minuti.","ad":"Strada Statale 673 Tangenziale di Foggia, 71100 Foggia","ar":"Foggia","tp":["Scalo minuscolo: i tempi di un aeroporto grande qui non servono","Il banco dei noleggi è dentro il terminal, non con la navetta"],"tg":["aeroporto","trasporti","gargano"]},{"id":"sicily-by-car-foggia","n":"Sicily By Car — Aeroporto di Foggia","lat":41.42454,"lng":15.54763,"ty":"auto","ic":"🚗","d":"Banco del noleggio auto al terminal dell'aeroporto Gino Lisa, ritiro e riconsegna nello stesso punto.","ad":"Aeroporto di Foggia Gino Lisa, 71100 Foggia","ph":"+39 0881 025422","ar":"Foggia","tp":["Serve la carta di credito fisica intestata al conducente: né prepagate né virtuali","Serve anche copia del biglietto di ritorno e un indirizzo locale (il nome del B&B basta)","Politica carburante: serbatoio allo stesso livello. Fotografa il livello al ritiro","Patente da almeno 12 mesi, minimo 19 anni"],"tg":["noleggio","auto","trasporti"]},{"id":"bb-rossini-vieste","n":"B&B Rossini","lat":41.883483,"lng":16.170517,"ty":"bb","ic":"🏠","d":"B&B nel cuore di Vieste, camera matrimoniale deluxe con balcone e vista mare. Colazione inclusa.","ad":"Via Gioacchino Rossini 27, 71019 Vieste (FG)","ph":"+39 346 303 9685","ar":"Vieste","wa":"Parcheggio non disponibile in struttura e nessuna connessione internet. Il check-in chiude alle 20:30.","tp":["Piani superiori accessibili solo a scale","Lo stesso numero di telefono risulta anche a Marina Vieste, il diportistico del porto: conviene chiedere a loro del parcheggio e della barca"],"tg":["dormire","vieste","colazione"]},{"id":"appartamento-langolo-san-severo","n":"Appartamento L'ANGOLO","lat":41.682933,"lng":15.381083,"ty":"appartamento","ic":"🏠","d":"Appartamento con una camera al piano terra, ingresso privato, cucina attrezzata e lavatrice, nel centro storico di San Severo a pochi passi dalla Cattedrale.","ad":"Via Cavour 34, 71016 San Severo (FG)","ph":"+39 388 657 3748","ar":"San Severo — Centro storico","wa":"Connessione internet non disponibile. Nessun pasto incluso.","tp":["Parcheggio pubblico gratuito in loco, senza prenotare","Va comunicato in anticipo l'orario di arrivo","C'è il ferro da stiro: utile se l'abito da cerimonia arriva in valigia"],"tg":["dormire","san severo","cucina"]},{"id":"bb-la-dimora-corato","n":"B&B La Dimora","lat":41.153567,"lng":16.410583,"ty":"bb","ic":"🏠","d":"Camera matrimoniale con bagno privato a Corato, a dieci minuti d'auto dalla campagna fra Andria e Corato.","ad":"Via Gisotti 4, 70033 Corato (BA)","ph":"+39 080 872 2153","ar":"Corato","wa":"Il check-in chiude alle 19:30 e il parcheggio privato va prenotato in anticipo. Piani superiori solo a scale.","tp":["Parcheggio privato gratuito ma su prenotazione: chiedilo quando chiami","L'uso della cucina costa 10 € al giorno e va chiesto prima, i kit sono pochi"],"tg":["dormire","corato","murge"]},{"id":"parco-archeologico-siponto","n":"Parco Archeologico di Siponto","lat":41.60963,"lng":15.89099,"ty":"museo","ic":"🏛️","d":"Sulla basilica normanna di Santa Maria, Edoardo Tresoldi ha rialzato nel 2016 la chiesa paleocristiana scomparsa con 4.500 metri di rete metallica zincata: quattordici metri di edificio trasparente che si vede attraverso. Non è un rudere e non è una ricostruzione — è l'unica cosa del genere in Italia.","ad":"Viale Giuseppe Di Vittorio, 71043 Manfredonia (FG)","web":"https://museipuglia.cultura.gov.it/musei/parco-archeologico-di-siponto/","ar":"Manfredonia","wa":"Orari discordanti tra Comune di Manfredonia (mer–dom 10:30–19:30) e Artsupp (mar–dom 10:00–18:00). Il sito del Ministero rimanda alla biglietteria Aditus, che non li pubblica. Telefona o considera la chiusura più stretta, le 18:00.","tp":["L'installazione dà il meglio con la luce bassa del pomeriggio: la rete cambia densità secondo l'angolo","È a bordo strada sulla SS89, non nel centro di Manfredonia"],"tg":["arte","archeologia","monumenti","tresoldi","installazione"],"hr":{"o":"Le fonti non concordano: il Comune di Manfredonia indica mercoledì–domenica 10:30–19:30 (primo weekend del mese 12:00–21:00, ultimo ingresso mezz'ora prima), Artsupp indica martedì–domenica 10:00–18:00 con il lunedì chiuso. In entrambe le versioni il giovedì è aperto nel primo pomeriggio."},"pr":{"a":5,"p":"ticket","n":"intero; ridotto 2 € (Comune di Manfredonia)","c":"EUR"},"dm":60},{"id":"santuario-san-michele","n":"Santuario di San Michele Arcangelo","lat":41.70816,"lng":15.95463,"ty":"santuario","ic":"⛪","d":"Patrimonio UNESCO, e non è una chiesa: è una grotta. Meta di pellegrinaggio da millecinquecento anni, la più antica dell'Occidente dedicata a San Michele, scavata nella roccia a 800 metri sopra il golfo di Manfredonia.","ad":"Via Reale Basilica 127, 71037 Monte Sant'Angelo (FG)","ph":"+39 0884 561150","web":"https://www.santuariosanmichele.it/","ar":"Monte Sant'Angelo","tp":["Si scende una lunga scalinata dentro la roccia: scarpe chiuse, e dentro fa fresco anche d'estate","Sei a 800 metri: la massima media di settembre qui è 20,9 °C contro i 26 della costa, porta una felpa","La Tomba di Rotari è a cinquanta metri, si vedono insieme"],"tg":["chiesa","unesco","monumenti","pellegrinaggio","gargano","panorama"],"hr":{"o":"Feriali 7:30–19:30, festivi 7:00–20:00 (fascia luglio–settembre). I Musei Tecum hanno orari propri e vanno prenotati. Orario luglio–settembre. Negli altri mesi cambia: verifica sul sito.","dd":{"0":[["07:30","19:30"]],"1":[["07:30","19:30"]],"2":[["07:30","19:30"]],"3":[["07:30","19:30"]],"4":[["07:30","19:30"]],"5":[["07:30","19:30"]],"6":[["07:00","20:00"]]}},"pr":{"f":1,"n":"Ingresso al santuario libero. Il sito non indica alcun costo."},"dm":60},{"id":"tomba-di-rotari","n":"Tomba di Rotari","lat":41.70747,"lng":15.95519,"ty":"museo","ic":"🏛️","d":"Battistero del XII secolo a cupola, a cinquanta metri dal santuario. Il nome è una leggenda — non è la tomba di nessun re longobardo — ma la pietra scolpita è vera.","ar":"Monte Sant'Angelo","wa":"Orari e costo non verificati: non li pubblica nessuna fonte ufficiale. Chiedi al santuario.","tg":["monumenti","chiesa","gargano"]},{"id":"porto-di-vieste","n":"Porto di Vieste — Molo Sud","lat":41.8822,"lng":16.1672,"ty":"transport_hub","ic":"✈️","d":"Il porto da cui partono le motobarche per le grotte marine. Le biglietterie sono sul Molo Sud, fra il Lungomare Vespucci e il Lungomare Colombo.","ad":"Lungomare Amerigo Vespucci, 71019 Vieste (FG)","ar":"Vieste","tp":["Parcheggio a pagamento in zona, e non c'è trasporto pubblico"],"tg":["porto","barca","trasporti","vieste"]},{"id":"tour-grotte-marine-vieste","n":"Tour delle grotte marine di Vieste","lat":41.8822,"lng":16.1672,"ty":"barca","ic":"🚤","d":"Tre ore di motobarca lungo la costa sud del Gargano, dodici miglia di litorale: si passa sotto il monolite di Pizzomunno e si entra nella Grotta Sfondata, nella Grotta dei Colori, nella Grotta dei Pomodori e nella Grotta dei Sogni, si attraversa l'Arco di Porto Greco e si arriva alla Baia delle Zagare. Un'ora di sosta bagno alla Baia dei Gabbiani.","bk":"https://freedome.it/attivita/tour-barca-vieste-grotte/","ar":"Vieste","tp":["Va prenotato con almeno due giorni di anticipo in alta stagione, a volte una settimana","Il ritrovo è 30 minuti prima: chi arriva dopo la partenza non viene rimborsato","Rimborso totale se non si parte per maltempo, ma nessun rimborso se il tempo peggiora a metà giro","Il mare a settembre sta sui 23,5 °C: il costume serve davvero","Cancellazione gratuita fino a 24 ore prima sulle piattaforme online"],"tg":["barca","mare","grotte","gargano","escursione","prenotare"],"hr":{"o":"Partenza alle 09:00, ritrovo 30 minuti prima. Ci sono anche partenze pomeridiane. Opera da aprile a ottobre"},"pr":{"a":30,"p":"person","n":"adulti 30 €, bambini 3–10 anni 15 €, sotto i 3 anni gratis. Vieste Sea Adventure fa lo stesso giro in gruppo di max 10 persone a circa 70 $.","c":"EUR"},"dm":180},{"id":"pizzomunno","n":"Pizzomunno","lat":41.87924,"lng":16.17744,"ty":"natura","ic":"🌊","d":"Il monolite bianco di venticinque metri piantato sulla spiaggia all'ingresso di Vieste. È il simbolo della città e si vede sia da terra che dalla barca.","ar":"Vieste","tg":["natura","mare","vieste","panorama","tramonto"],"hr":{"ao":1},"pr":{"f":1}},{"id":"baia-delle-zagare","n":"Baia delle Zagare (Baia dei Mergoli)","lat":41.74495,"lng":16.14448,"ty":"beach","ic":"🏖️","d":"I due faraglioni più fotografati del Gargano, in una baia raggiungibile in pratica solo dal mare. È il punto di svolta del giro in barca.","ar":"Mattinata","wa":"Da terra l'accesso è riservato agli ospiti delle strutture sopra la baia: dal mare si vede senza problemi.","tg":["mare","spiagge","natura","gargano","barca"],"hr":{"ao":1}},{"id":"vignanotica","n":"Baia di Vignanotica","lat":41.76208,"lng":16.16515,"ty":"beach","ic":"🏖️","d":"Ghiaia bianca sotto una falesia a strapiombo, fra Vieste e Mattinata. Alcune motobarche fanno qui la sosta bagno.","ar":"Vieste","wa":"Da terra si scende a piedi per circa venti minuti dal parcheggio, e si risale.","tg":["mare","spiagge","natura","gargano"],"hr":{"ao":1}},{"id":"cattedrale-san-severo","n":"Cattedrale di San Severo","lat":41.68519,"lng":15.38044,"ty":"chiesa","ic":"⛪","d":"La chiesa madre di San Severo, nel centro storico. Impianto romanico rimaneggiato in barocco dopo il terremoto del 1627.","ad":"Largo Cattedrale, 71016 San Severo (FG)","ar":"San Severo — Centro storico","wa":"Zona a traffico limitato: in auto non ci si arriva davanti. Orari di apertura non verificati.","tg":["chiesa","monumenti","san severo","matrimonio"]},{"id":"chiesa-san-lorenzo-san-severo","n":"Chiesa di San Lorenzo delle Benedettine","lat":41.68765,"lng":15.38036,"ty":"chiesa","ic":"⛪","d":"Facciata rococò in marmo di Apricena e pianta centrale con altari sovrabbondanti: chi scrive di San Severo la indica come il monumento più bello della città.","ad":"Corso Giuseppe Garibaldi, 71016 San Severo (FG)","ar":"San Severo — Centro storico","wa":"Orari di apertura non verificati.","tg":["chiesa","monumenti","san severo","barocco"]},{"id":"teatro-verdi-san-severo","n":"Teatro Giuseppe Verdi","lat":41.68792,"lng":15.38061,"ty":"museo","ic":"🏛️","d":"Neoclassico, inaugurato nel 1819 come Teatro Real Borbone: il terzo teatro della Puglia per dimensioni dopo il Petruzzelli di Bari e il Politeama di Lecce. Andrea Pazienza, da ragazzo, ne curò alcune scenografie.","ad":"Via Tiberio Solis, 71016 San Severo (FG)","ar":"San Severo — Centro storico","wa":"Orari di visita non verificati: apre per la stagione teatrale, non come museo.","tg":["monumenti","san severo","teatro"]},{"id":"mat-san-severo","n":"MAT — Museo dell'Alto Tavoliere","lat":41.68721,"lng":15.37879,"ty":"museo","ic":"🏛️","d":"Museo civico nell'ex convento francescano: archeologia del Tavoliere dal Paleolitico al tardo antico. Dentro c'è anche SPLASH!, il principale archivio italiano su Andrea Pazienza.","ad":"Piazza San Francesco 48, 71016 San Severo (FG)","ph":"+39 0882 339611","ar":"San Severo — Centro storico","wa":"Le due fonti ufficiali si contraddicono sugli orari. Il sabato mattina risulta chiuso in entrambe le versioni. Telefona prima di andarci.","tg":["museo","san severo","archeologia","pazienza","fumetto"],"hr":{"o":"Il sito del museo indica lunedì–venerdì 9:00–13:30 e 17:30–20:30, sabato 18:00–21:00, domenica 10:30–13:30 e 18:00–21:00. Il Comune pubblica invece un calendario più recente (dal 26/03/2025) con lunedì–mercoledì 10:00–13:00 e il martedì pomeriggio solo su prenotazione."},"pr":{"f":1,"n":"Ingresso gratuito (sito ufficiale del museo)."}},{"id":"cantine-darapri","n":"Cantine D'Araprì","lat":41.68611,"lng":15.38403,"ty":"cantina","ic":"🍷","d":"I pionieri del Metodo Classico in Puglia: spumanti da Bombino Bianco che maturano nei sotterranei settecenteschi sotto il centro storico di San Severo. Le visite passano dai cunicoli scavati nel tufo.","ad":"Via Michele Zannotti 30, 71016 San Severo (FG)","ph":"+39 0882 227643","web":"https://darapri.it/tour/","ar":"San Severo — Centro storico","wa":"Posizione a livello di strada, civico non geolocalizzato. Telefono e indirizzo vengono da directory di terze parti, non dal sito ufficiale: verificali chiamando. Orari e costo delle visite non pubblicati.","tp":["In cantina ci sono 12–14 °C: porta qualcosa sopra anche a settembre","Le visite si fanno in italiano, inglese e spagnolo, e vanno prenotate","Il vino della zona è il San Severo DOC, prima DOC della Puglia nel 1968"],"tg":["vino","cantina","san severo","degustazione","prenotare"]},{"id":"villa-santelia","n":"Villa Santelia","lat":41.179048,"lng":16.361101,"ty":"museo","ic":"🏛️","d":"Dimora storica settecentesca in pietra di Trani, fra ulivi secolari nella campagna tra Andria e Corato. È la location del ricevimento.","ad":"S.P. 231 (ex S.S. 98) Andria–Corato km 40","ph":"+39 0883 501999","web":"https://villasantelia.it/","ar":"Campagna fra Andria e Corato","wa":"Il sito della villa si contraddice: il footer indica la S.P. 231 Andria–Corato km 40, il link mappa punta a Contrada Santa Maria, 76125 Trani (41.179048, 16.361101). Qui è usata la coordinata della mappa. Conferma con la struttura o con gli sposi.","tp":["Un secondo numero, anche WhatsApp: +39 328 942 8620"],"tg":["matrimonio","monumenti","murge","ricevimento"]},{"id":"cattedrale-di-trani","n":"Cattedrale di Trani","lat":41.28221,"lng":16.41848,"ty":"chiesa","ic":"⛪","d":"San Nicola Pellegrino, il romanico pugliese costruito sullo scoglio con il mare su tre lati. È la cattedrale più fotografata della Puglia e sta a un quarto d'ora da Corato.","ad":"Piazza Duomo, 76125 Trani (BT)","ar":"Trani","wa":"Orari di apertura non verificati.","tg":["chiesa","monumenti","trani","mare","romanico"]},{"id":"la-ripa-vieste","n":"Ristorante La Ripa","lat":41.88126,"lng":16.18173,"ty":"trattoria","ic":"🍽️","d":"Dentro un convento del Quattrocento nel centro storico, con il dehors sotto la bouganville. In cucina Andrea Miacola.","ad":"Via Cimaglia 16, 71019 Vieste (FG)","ar":"Vieste — Centro storico","wa":"Orari, prezzi e telefono non verificati.","tg":["mangiare","pesce","vieste","cena","pranzo"],"dh":["pasta al pomodoro"]},{"id":"ristorante-acqua-vieste","n":"Ristorante Acqua","lat":41.88534,"lng":16.17806,"ty":"pesce","ic":"🐟","d":"Sala in un antico oleificio con la vista dall'alto sul porto. Chef Pasquale Pellegrino, pesce fresco.","ad":"Via Trepiccioni, 71019 Vieste (FG)","ar":"Vieste — Centro storico","wa":"Orari, prezzi e telefono non verificati.","tg":["mangiare","pesce","vieste","cena","pranzo","vista"]},{"id":"enoteca-vesta-vieste","n":"Enoteca Vesta","lat":41.883,"lng":16.179,"ty":"trattoria","ic":"🍽️","d":"Ristorante-enoteca ricavato in una grotta in pieno centro storico, indicato come il riferimento più affidabile della città.","ar":"Vieste — Centro storico","wa":"Posizione approssimativa: la fonte dice solo «una grotta nel centro storico», l'indirizzo civico non è pubblicato. Orari, prezzi e telefono non verificati.","tg":["mangiare","pesce","vino","vieste","cena"],"dh":["spaghetto con i ricci","troccoli ai ceci","ciambotto di crostacei","pettole col vincotto"]},{"id":"il-capriccio-vieste","n":"Il Capriccio","lat":41.8824,"lng":16.1676,"ty":"pesce","ic":"🐟","d":"Sul molo del porto, fra le barche. Chef Leonardo Vescera.","ar":"Vieste — Porto","wa":"Posizione approssimativa: la fonte dice solo «sul molo del porto», l'indirizzo civico non è pubblicato. Orari, prezzi e telefono non verificati.","tg":["mangiare","pesce","vieste","cena","porto"]},{"id":"donlu-vieste","n":"Donlù","lat":41.8828,"lng":16.1795,"ty":"trattoria","ic":"🍽️","d":"Nella piazzetta del Seggio, dei fratelli Donato e Luca Martella. Funziona anche solo per un aperitivo.","ar":"Vieste — Centro storico","wa":"Posizione approssimativa: la piazzetta del Seggio non è geolocalizzata nelle fonti aperte. Orari, prezzi e telefono non verificati.","tg":["mangiare","aperitivo","vieste","cena"]},{"id":"filo-dolio-vieste","n":"Filo d'olio","lat":41.8832,"lng":16.1786,"ty":"trattoria","ic":"🍽️","d":"Bruschetteria in una piazzetta con le luminarie: fave e cicorie, taglieri, focacce, panzerotti. La scelta economica e senza pretese.","ar":"Vieste — Centro storico","wa":"Posizione approssimativa: la fonte indica solo «una piazzetta con luminarie». Orari, prezzi e telefono non verificati.","tg":["mangiare","economico","vieste","cena","aperitivo"],"dh":["fave e cicorie","panzerotti","focaccia"]}],DAYS=[{"d":1,"date":"2026-09-24","ti":"Arrivo, Tresoldi e il santuario nella roccia","em":"✈️","th":"arrivo","sr":"06:44","ss":"18:51","tp":[17,26],"nt":"Giornata a incastro: hai l'auto alle 15:30 e il check-in a Vieste chiude alle 20:30. Nel mezzo ci stanno due tappe, ma solo se non ti allarghi. Le due ore di guida sono già contate.","ar":"Manfredonia · Monte Sant'Angelo · Vieste","ev":[{"t":"13:20","k":"transfer","ic":"✈️","te":"14:50","p":"aeroporto-foggia","l":"Volo Milano Linate → Foggia Gino Lisa","nt":"Orario già modificato una volta da Aeroitalia: era un altro, questo è quello valido.","bk":"volo-andata"},{"t":"15:30","k":"transfer","ic":"🚗","te":"15:45","p":"sicily-by-car-foggia","nt":"Metti in conto un quarto d'ora di pratiche: da qui in poi l'orario della giornata si conta da quando esci dal parcheggio, non da quando atterri.","bk":"auto-foggia"},{"t":"16:45","k":"visit","ic":"🏛️","te":"17:35","p":"parco-archeologico-siponto","nt":"56 minuti dall'aeroporto. Cinquanta minuti bastano, e arrivi nell'ora giusta per come è fatta quest'opera."},{"t":"18:05","k":"visit","ic":"⛪","te":"18:55","p":"santuario-san-michele","nt":"26 minuti da Siponto, in salita. Il tramonto è alle 18:51 e tu sei quassù: questa è l'ora buona, non un ripiego. Il santuario chiude alle 19:30, quindi cinquanta minuti ci stanno.","st":["santuario-san-michele","tomba-di-rotari"]},{"t":"20:05","k":"checkin","ic":"🏠","te":"20:30","p":"bb-rossini-vieste","nt":"68 minuti di tornanti da Monte Sant'Angelo, gli ultimi al buio. Hai 25 minuti di margine, non di più: se la giornata scivola, chiama invece di correre.","bk":"bb-rossini"},{"t":"21:00","k":"meal","ic":"🐟","p":"ristorante-acqua-vieste","nt":"Prenota nel pomeriggio, mentre sei ancora in macchina: arrivi verso le 21:00 e a settembre Vieste è ancora piena."}]},{"d":2,"date":"2026-09-25","ti":"Le grotte dal mare, poi il Tavoliere","em":"🚤","th":"mare","sr":"06:49","ss":"18:52","tp":[17,26],"nt":"Il giorno migliore del viaggio, e l'unico con un orario che non perdona: la barca parte alle 09:00 e il ritrovo è alle 08:30. Il check-out va fatto prima di imbarcarti, non dopo.","ar":"Vieste · San Severo","ev":[{"t":"08:15","k":"checkin","ic":"🏠","p":"bb-rossini-vieste","l":"Check-out dal B&B Rossini","nt":"Prima della barca, non dopo: alle 10:30 — che è il limite — sei in mezzo al mare. Valigie in auto e via al porto. La colazione è inclusa: fattela prima."},{"t":"08:30","k":"activity","ic":"🚤","te":"12:00","p":"tour-grotte-marine-vieste","nt":"Ritrovo alle 08:30, non alle 09:00: chi arriva dopo la partenza non viene rimborsato. Costume e crema addosso da subito, non in valigia.","bk":"tour-barca","st":["pizzomunno","vignanotica","baia-delle-zagare"]},{"t":"12:30","k":"meal","ic":"🍽️","te":"14:00","p":"enoteca-vesta-vieste","nt":"Il pranzo lungo che hai scelto, senza fretta: sei appena scesa dalla barca e il pomeriggio è solo guida. Spaghetto con i ricci, troccoli ai ceci, ciambotto di crostacei."},{"t":"14:15","k":"transfer","ic":"🚗","te":"16:05","l":"Vieste → San Severo in auto","nt":"106 km e 1h49 reali, non un'ora: sono tornanti dentro il Gargano fino a Foggia, poi pianura. Se vuoi allungare, Monte Sant'Angelo e San Giovanni Rotondo sono su questa strada — ma aggiungono mezz'ora di sola guida e stasera hai la festa."},{"t":"16:15","k":"checkin","ic":"🏠","p":"appartamento-langolo-san-severo","nt":"Appena entri, tira fuori l'abito di domani e stiralo adesso: domattina hai il check-out alle 11:00 e la testa altrove.","bk":"langolo"},{"t":"17:15","k":"activity","ic":"🍷","te":"18:30","p":"cantine-darapri","nt":"Da chiamare prima, perché orari e prezzi non li pubblicano. Un'ora e un quarto è quanto ci sta senza mangiare il tempo della serata."},{"t":"20:00","k":"nightlife","ic":"🎉","l":"Serata a casa di AC, San Severo","nt":"«Buon cibo, buona musica e ottima compagnia per entrare nel mood del weekend»: gli sposi la danno per non mancabile. ⚠️ L'indirizzo non è nei documenti: chiedilo e mettilo sulla mappa."}]},{"d":3,"date":"2026-09-26","ti":"Il grande giorno","em":"💍","th":"matrimonio","sr":"06:46","ss":"18:46","tp":[17,26],"nt":"Il giorno per cui sei venuto. Due vincoli veri: alle 16:00 la cerimonia comincia (il parroco è stato citato esplicitamente) e alle 11:00 scade il check-out. Fra i due c'è il buco in cui devi vestirti.","ar":"San Severo · Villa Santelia","ev":[{"t":"09:00","k":"free","ic":"☕","te":"10:30","l":"Colazione e il centro storico di San Severo","nt":"Tutto in trecento metri da Via Cavour: la Cattedrale dove ci si sposa fra sei ore, San Lorenzo delle Benedettine con la facciata rococò in marmo di Apricena, il Teatro Verdi. Serve anche a capire dove sarà il parcheggio nel pomeriggio.","st":["cattedrale-san-severo","chiesa-san-lorenzo-san-severo","teatro-verdi-san-severo"]},{"t":"11:00","k":"checkin","ic":"🏠","p":"appartamento-langolo-san-severo","l":"Check-out dall'Appartamento L'ANGOLO","nt":"⚠️ Se hai ottenuto il late check-out, questa è l'ora in cui vestirsi con calma. Se non l'hai ottenuto, vestiti PRIMA delle 11:00: il prossimo posto tuo è a Corato, a un'ora e mezza da qui, e non ci passi prima della cerimonia."},{"t":"12:30","k":"meal","ic":"🍽️","te":"14:00","l":"Pranzo leggero a San Severo","nt":"Leggero per un motivo pratico: alle 16:00 cominci una giornata che finisce a notte, con un ricevimento nel mezzo. Nel centro storico i bar e le trattorie ci sono; non ne ho uno verificato da consigliarti per nome, quindi scegli sul posto invece di fidarti di un indirizzo che non ho controllato."},{"t":"15:00","k":"visit","ic":"⛪","te":"15:30","p":"cattedrale-san-severo","nt":"Gli sposi chiedono di arrivare fra le 15:00 e le 15:30. Centro storico in ZTL: davanti alla Cattedrale in auto non ci arrivi, i parcheggi li indicheranno loro."},{"t":"16:00","k":"activity","ic":"⛪","te":"17:15","p":"cattedrale-san-severo","l":"⛪ Cerimonia","nt":"Inizio alle 16:00, puntuali — sono parole degli sposi, con il parroco a garanzia."},{"t":"17:20","k":"transfer","ic":"🚗","te":"18:45","l":"San Severo → Villa Santelia in auto","nt":"123 km e 1h22 reali. Gli sposi dicono «~1h» e «partite senza indugiare per godervi il tramonto»: il tramonto è alle 18:46, quindi hanno ragione — se esci dalla Cattedrale alle 17:20 arrivi giusto. Ogni quarto d'ora perso qui è un quarto d'ora di luce perso là."},{"t":"19:00","k":"activity","ic":"🏛️","p":"villa-santelia","nt":"Festa fino a tarda notte. Il letto è a dieci minuti da qui, e questo è il momento in cui serve che la telefonata al B&B sia stata fatta."},{"t":"23:59","k":"checkin","ic":"🏠","p":"bb-la-dimora-corato","nt":"⚠️ Solo 6,6 km e 10 minuti da Villa Santelia — è il motivo per cui Corato era la scelta giusta. MA il check-in chiude alle 19:30: se non hai concordato l'arrivo tardivo, questa riga non funziona. È la prima telefonata della lista.","bk":"la-dimora"}]},{"d":4,"date":"2026-09-27","ti":"Rientro da Foggia","em":"🛫","th":"partenza","sr":"06:50","ss":"18:48","tp":[17,26],"nt":"Giornata di solo rientro, come hai scelto. L'unica cosa da sapere è che il voucher dell'auto dice 13:00 e il volo parte alle 13:25: quei due orari non stanno insieme, quindi vale il volo.","ar":"Corato · Foggia","ev":[{"t":"09:30","k":"free","ic":"☕","te":"10:30","l":"Colazione a Corato e valigie","nt":"La colazione del B&B è a pagamento e soggetta a disponibilità: i bar di Corato sono l'alternativa. Il check-out chiude alle 10:30, quindi la sveglia è comunque obbligata."},{"t":"10:30","k":"transfer","ic":"🚗","te":"11:55","l":"Corato → Aeroporto di Foggia in auto","nt":"98 km e 1h25. Partire alle 10:30 non è prudenza eccessiva: è l'ora in cui ti buttano fuori dal B&B comunque."},{"t":"11:55","k":"transfer","ic":"🚗","te":"12:15","p":"sicily-by-car-foggia","nt":"⚠️ Il voucher dice riconsegna alle 13:00, ma il volo parte alle 13:25 e il check-in chiude prima: riconsegna verso mezzogiorno. Restituire l'auto in anticipo non comporta penali, solo nessun rimborso del tempo. Rimetti il carburante al livello del ritiro: altrimenti pagano loro il pieno, più 42,70 € di servizio.","bk":"auto-foggia"},{"t":"13:25","k":"transfer","ic":"✈️","te":"14:55","p":"aeroporto-foggia","l":"Volo Foggia Gino Lisa → Milano Linate","bk":"volo-ritorno"}]}],BK=[{"id":"volo-andata","p":"aeroporto-foggia","st":"confirmed","dt":"2026-09-24","tm":"13:20","nt":"Orario modificato da Aeroitalia il 19 marzo 2026 per motivi operativi: vale questo, non quello della prenotazione originale.","pr":null,"mp":null,"mt":null,"cx":null,"rf":"sul telefono","pin":null,"fn":"XZ2227"},{"id":"volo-ritorno","p":"aeroporto-foggia","st":"confirmed","dt":"2026-09-27","tm":"13:25","nt":"Orario modificato da Aeroitalia il 19 marzo 2026. Attenzione: la riconsegna auto è prenotata alle 13:00, cioè dopo la chiusura del check-in — riconsegna verso mezzogiorno.","pr":null,"mp":null,"mt":null,"cx":null,"rf":"sul telefono","pin":null,"fn":"XZ2226"},{"id":"auto-foggia","p":"sicily-by-car-foggia","st":"confirmed","dt":"2026-09-24","tm":"15:30","nt":"Al banco servono: carta di credito FISICA intestata al conducente (no prepagate, no virtuali), patente da almeno 12 mesi, documento d'identità dello stesso paese della patente, il voucher, un numero di telefono, l'indirizzo dell'alloggio e la copia del biglietto di ritorno. Se manca uno di questi possono rifiutare l'auto e applicare le penali di cancellazione.","pr":null,"mp":null,"mt":null,"cx":null,"rf":"sul telefono","pin":null,"fn":null},{"id":"bb-rossini","p":"bb-rossini-vieste","st":"confirmed","dt":"2026-09-24","tm":null,"nt":"È richiesto il pagamento anticipato tramite bonifico bancario: la struttura contatta lei con le istruzioni. Verifica di averlo fatto.","pr":{"amount":73.73,"currency":"EUR","paid":false,"note":"72 € + 5 € di tassa di soggiorno, meno 3,27 € di Bonus VIP Booking"},"mp":null,"mt":null,"cx":"Gratuita fino al 16 settembre 2026 23:59. Dal 17 settembre: 72 €. Le date non si possono cambiare.","rf":"sul telefono","pin":"••••","fn":null},{"id":"langolo","p":"appartamento-langolo-san-severo","st":"confirmed","dt":"2026-09-25","tm":null,"nt":"Va comunicato in anticipo l'orario di arrivo. Al check-in servono documento con foto e carta di credito.","pr":{"amount":56.7,"currency":"EUR","paid":false,"note":"51,55 € + 5,15 € IVA, meno 2,58 € di Bonus VIP Booking"},"mp":null,"mt":null,"cx":"Gratuita fino al 22 settembre 2026 23:59. Dal 23 settembre: 56,70 €. Le date non si possono cambiare.","rf":"sul telefono","pin":"••••","fn":null},{"id":"la-dimora","p":"bb-la-dimora-corato","st":"confirmed","dt":"2026-09-26","tm":null,"nt":"⚠️ Il check-in accettato è 00:00–19:30, ma il sabato sera sei al ricevimento: da concordare per telefono. Il parcheggio privato è gratuito ma va prenotato.","pr":{"amount":55,"currency":"EUR","paid":false,"note":"50 € + 5 € IVA"},"mp":null,"mt":null,"cx":"Rimborso totale se cancelli entro il 11 settembre 2026 23:59. Dal 12 settembre nessun rimborso.","rf":"sul telefono","pin":"••••","fn":null},{"id":"tour-barca","p":"tour-grotte-marine-vieste","st":"pending","dt":"2026-09-25","tm":"09:00","nt":"DA PRENOTARE: servono almeno due giorni di anticipo, in alta stagione a volte una settimana. Online su freedome.it/attivita/tour-barca-vieste-grotte/ con conferma immediata, oppure al telefono con le motobarche di Vieste in Barca allo stesso prezzo.","pr":{"amount":60,"currency":"EUR","paid":false,"note":"30 € a persona per 2 persone"},"mp":"Porto di Vieste, Molo Sud","mt":"08:30","cx":"Sulle piattaforme online: gratuita fino a 24 ore prima, rimborso totale.","rf":null,"pin":null,"fn":null}],CALLS=[{"w":"Concordare il check-in tardivo o autonomo","wh":"B&B La Dimora, Corato","ph":"+39 080 872 2153","dl":"subito","y":"Il check-in chiude alle 19:30 di sabato, ma alle 19:30 sei a Villa Santelia in pieno ricevimento e ne uscirai a notte. Senza un accordo torni a una porta chiusa. Chiedi anche il parcheggio privato, che è gratuito ma su prenotazione.","pr":1},{"w":"Prenotare il tour delle grotte marine, 2 persone, partenza 09:00 di venerdì 25","wh":"Freedome (online) oppure Vieste in Barca","ph":"+39 368 572426","dl":"entro il 23 settembre","y":"Serve prenotare con almeno due giorni di anticipo, in alta stagione a volte una settimana. Online su freedome.it la conferma è immediata e si cancella gratis fino a 24 ore prima; al telefono le motobarche di Vieste in Barca costano gli stessi 30 € a testa.","pr":2},{"w":"Chiedere il late check-out di sabato e comunicare l'ora di arrivo di venerdì","wh":"Appartamento L'ANGOLO, San Severo","ph":"+39 388 657 3748","dl":"entro il 22 settembre","y":"Il check-out è alle 11:00 e la cerimonia alle 16:00: senza un'ora in più non hai una stanza in cui vestirti. Loro chiedono comunque di comunicare in anticipo l'orario di arrivo.","pr":3},{"w":"Chiedere dove lasciare l'auto","wh":"B&B Rossini, Vieste","ph":"+39 346 303 9685","dl":"entro il 23 settembre","y":"La struttura non ha parcheggio e arrivi alle 20:05 in una città che non conosci. Lo stesso numero risulta anche a Marina Vieste, il diportistico del porto: chiedi del parcheggio e del giro in barca nella stessa telefonata. Verifica anche se il bonifico anticipato è già stato fatto.","pr":4},{"w":"Chiedere se fanno una visita venerdì nel tardo pomeriggio, e quanto costa","wh":"Cantine D'Araprì, San Severo","ph":"+39 0882 227643","dl":"opzionale","y":"Orari e prezzi non li pubblicano, e il numero viene da una directory, non dal loro sito: se non risponde, il pomeriggio di venerdì resta il centro storico a piedi. Non è una telefonata che blocca il viaggio.","pr":5}],SLEEP={"1":"bb-rossini-vieste","2":"appartamento-langolo-san-severo","3":"bb-la-dimora-corato"},TRIP={"from":"2026-09-24","to":"2026-09-27"};
+var PBI={};PL.forEach(function(p){PBI[p.id]=p});
+var map,mk={},layer;
+function eE(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+/* ── le spunte restano sul telefono e funzionano offline */
+function tglChk(id){var el=document.getElementById(id);if(!el)return;
+ var on=el.classList.toggle('done');
+ var b=el.querySelector('.ev-box');if(b)b.classList.toggle('on',on);
+ try{localStorage.setItem('pg_chk_'+id,on?'1':'0')}catch(e){}}
+function restoreChk(){document.querySelectorAll('.ev.chk').forEach(function(el){
+ var v;try{v=localStorage.getItem('pg_chk_'+el.id)}catch(e){}
+ if(v==='1'){el.classList.add('done');
+  var b=el.querySelector('.ev-box');if(b)b.classList.add('on')}})}
+function isV(p){try{return localStorage.getItem('pg_v_'+p.id)==='1'}catch(e){return false}}
+function tglV(id){var p=PBI[id];if(!p)return;
+ try{localStorage.setItem('pg_v_'+p.id,isV(p)?'0':'1')}catch(e){}
+ if(mk[id])mk[id].setIcon(mkIcon(p))}
+function mkIcon(p){return L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],
+ html:'<div class="mk'+(isV(p)?' visited':'')+'">'+p.ic+'</div>'})}
+
+/* ── "Aperto ora" SOLO se ci sono le fasce vere. Dove ho soltanto una nota la stampo
+   come sta scritta: meglio una nota verbatim che uno stato inventato. */
+function openNow(p){
+ if(!p.hr)return null;
+ if(p.hr.ao)return {o:true,txt:'Sempre accessibile'};
+ if(!p.hr.dd)return null;
+ var now=new Date(),wd=(now.getDay()+6)%7,cur=now.getHours()*60+now.getMinutes();
+ var sl=p.hr.dd[String(wd)];
+ if(sl===0)return {o:false,txt:'Chiuso oggi'};
+ if(!sl)return null;
+ for(var i=0;i<sl.length;i++){
+  var a=sl[i][0].split(':'),b=sl[i][1].split(':');
+  var s=+a[0]*60+ +a[1],en=+b[0]*60+ +b[1];
+  if(cur>=s&&cur<=en)return {o:true,txt:'Aperto ora, chiude '+sl[i][1]}}
+ return {o:false,txt:'Chiuso ora, apre '+sl[0][0]}}
+function priceTxt(pr){
+ if(!pr)return '';
+ if(pr.f)return 'Gratis';
+ var s='';
+ if(pr.a!=null)s='€ '+pr.a;
+ if(pr.t!=null)s+='–€ '+pr.t;
+ if(pr.p==='person'&&pr.a!=null)s+=' a persona';
+ if(pr.n)s+=' · '+pr.n;
+ return s}
+
+/* ── la scheda di un luogo. Ordine fisso delle icone, e nessuna icona senza il dato
+   dietro: un telefono senza numero e' un tocco che non fa niente. */
+function pCard(p,badge){
+ var h='<div class="row">';
+ if(badge)h+='<div class="row-b">'+eE(badge)+'</div>';
+ h+='<div class="row-m"><div class="row-n">'+eE(p.n)+'</div>';
+ if(p.d)h+='<div class="row-d">'+eE(p.d)+'</div>';
+ var on=openNow(p),meta=[];
+ if(on)meta.push('<span class="badge '+(on.o?'open':'shut')+'">'+eE(on.txt)+'</span>');
+ if(p.pr)meta.push(eE(priceTxt(p.pr)));
+ if(p.dm)meta.push('~'+p.dm+' min');
+ if(p.ar)meta.push('🗺️ '+eE(p.ar));
+ if(meta.length)h+='<div class="row-meta">'+meta.join(' · ')+'</div>';
+ if(p.ad)h+='<div class="row-meta">🗺️ '+eE(p.ad)+'</div>';
+ if(p.hr&&p.hr.o)h+='<div class="row-meta">🕒 '+eE(p.hr.o)+'</div>';
+ if(p.dh)h+='<div class="row-meta">Da provare: '+p.dh.map(eE).join(' · ')+'</div>';
+ if(p.tp)h+='<div class="row-meta">💡 '+p.tp.map(eE).join(' · ')+'</div>';
+ if(p.wa)h+='<div class="warn"><b>⚠️</b> '+eE(p.wa)+'</div>';
+ h+='</div><div class="tools">';
+ if(p.ph)h+='<a class="tool" href="tel:'+eE(p.ph.replace(/ /g,''))+'" title="Chiama" aria-label="Chiama '+eE(p.n)+'">📞</a>';
+ h+='<button class="tool" onclick="aFocus(&#39;'+eE(p.id)+'&#39;)" title="Mostra sulla mappa" aria-label="Mostra sulla mappa: '+eE(p.n)+'">🧭</button>';
+ h+='<a class="tool" href="https://www.google.com/maps/search/?api=1&amp;query='+p.lat+','+p.lng+'" target="_blank" rel="noopener" title="Apri in Google Maps" aria-label="Apri in Google Maps: '+eE(p.n)+'">📍</a>';
+ if(p.web)h+='<a class="tool" href="'+eE(p.web)+'" target="_blank" rel="noopener" title="Sito" aria-label="Sito di '+eE(p.n)+'">🌐</a>';
+ if(p.bk)h+='<a class="tool" href="'+eE(p.bk)+'" target="_blank" rel="noopener" title="Prenota" aria-label="Prenota '+eE(p.n)+'">🎟️</a>';
+ h+='<button class="tool" onclick="tglV(&#39;'+eE(p.id)+'&#39;)" title="Segna come fatto" aria-label="Segna come fatto: '+eE(p.n)+'">✓</button>';
+ h+='</div></div>';
+ return h}
+function aFocus(id){var p=PBI[id];if(!p||!map)return;
+ document.querySelector('.map-section').classList.add('expanded');
+ setTimeout(function(){map.invalidateSize();map.setView([p.lat,p.lng],15,{animate:true});
+  if(mk[id])mk[id].openPopup()},380);
+ window.scrollTo({top:0,behavior:'smooth'})}
+/* L'ingombro delle barre incollate in cima si MISURA, non si cabla: `scrollIntoView`
+   allinea la card al bordo del viewport, cioe' sotto topbar + tab, e il titolo del
+   giorno finiva coperto di 55-73 px a seconda di quante righe occupa. Misurato, non
+   dedotto: vedi il controllo "il titolo del giorno non finisce sotto le barre" in
+   guarda_puglia.mjs. */
+function stickyOff(){var t=document.querySelector('.topbar'),b=document.querySelector('.tabs');
+ return (t?t.offsetHeight:0)+(b?b.offsetHeight:0)+8}
+function goDay(n){var el=document.getElementById('d'+n);
+ if(el)window.scrollTo({top:el.getBoundingClientRect().top+window.pageYOffset-stickyOff(),
+                        behavior:'smooth'});
+ document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===n-1)});
+ var d=DAYS[n-1];if(d&&map){var pts=d.ev.filter(function(x){return x.p&&PBI[x.p]})
+  .map(function(x){return [PBI[x.p].lat,PBI[x.p].lng]});
+  if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:13})}}
+
+/* ══════════ ASSISTENTE — parole chiave, offline, nessuna API, nessuna chiave ══════════ */
+function aNorm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+function aHas(q,w){return new RegExp('(^|[^a-z0-9])'+w,'i').test(q)}
+function aWord(q,w){return new RegExp('(^|[^a-z0-9])'+w+'([^a-z0-9]|$)','i').test(q)}
+function aOut(h){document.getElementById('askOut').innerHTML=h}
+function aT(t){return '<div class="ask-t">'+eE(t)+'</div>'}
+/* Oggi mappato sui giorni veri del viaggio. Fuori dalla finestra restituisce null e
+   chi chiama lo dice, invece di far finta che oggi sia il giorno 1. */
+function aDayIdx(off){off=off||0;
+ var n=new Date(),iso=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+ for(var i=0;i<DAYS.length;i++)if(DAYS[i].date===iso){
+  var j=i+off;return (j>=0&&j<DAYS.length)?j:null}
+ return null}
+function aFuori(){return aT('Oggi non sei in Puglia')+'<div class="ev-alt">Il viaggio va dal '+
+ eE(TRIP.from)+' al '+eE(TRIP.to)+'. Ecco tutti i giorni:</div>'+
+ DAYS.map(function(d){return '<div class="row"><div class="row-b">G'+d.d+'</div><div class="row-m">'+
+  '<div class="row-n">'+eE(d.date+' — '+d.ti)+'</div>'+
+  (d.ar?'<div class="row-meta">🗺️ '+eE(d.ar)+'</div>':'')+
+  '</div><div class="tools"><button class="tool" onclick="goDay('+d.d+')" title="Vai al giorno '+d.d+'" aria-label="Vai al giorno '+d.d+'">→</button></div></div>'}).join('')}
+function aDayRows(d){
+ var h=aT('Giorno '+d.d+' · '+d.date+' — '+d.ti);
+ if(d.nt)h+='<div class="ev-alt">'+eE(d.nt)+'</div>';
+ d.ev.forEach(function(x){
+  var p=x.p?PBI[x.p]:null,when=x.t+(x.te?'–'+x.te:'');
+  if(p&&!x.l){h+=pCard(p,when)}
+  else{h+='<div class="row"><div class="row-b">'+eE(when)+'</div><div class="row-m">'+
+   '<div class="row-n">'+eE(x.l||x.k)+'</div>'+
+   (x.nt?'<div class="row-d">'+eE(x.nt)+'</div>':'')+'</div>'+
+   (p?'<div class="tools"><button class="tool" onclick="aFocus(&#39;'+eE(p.id)+'&#39;)" title="Mostra sulla mappa" aria-label="Mostra sulla mappa: '+eE(p.n)+'">🧭</button></div>':'')+
+   '</div>'}});
+ var sid=SLEEP[String(d.d)];
+ if(sid&&PBI[sid])h+=aT('Dove dormi')+pCard(PBI[sid]);
+ h+='<div class="ask-t"><button class="ask-chip" onclick="goDay('+d.d+')">Vai al giorno '+d.d+'</button></div>';
+ return h}
+function aByName(q){
+ var hit=PL.filter(function(p){return aNorm(p.n).indexOf(q)>=0});
+ if(!hit.length)return null;
+ return aT(hit.length+(hit.length===1?' luogo trovato':' luoghi trovati'))
+  +hit.slice(0,12).map(function(p){return pCard(p)}).join('')}
+function aByTag(tags,title){
+ var hit=PL.filter(function(p){return (p.tg||[]).some(function(t){return tags.indexOf(t)>=0})});
+ if(!hit.length)return aT(title)+'<div class="ev-alt">Non ho niente di verificato da mostrarti qui.</div>';
+ return aT(title+' — '+hit.length)+hit.map(function(p){return pCard(p)}).join('')}
+/* Parole riservate: sono categorie e non devono passare per la ricerca per nome.
+   E' la trappola di "sentieri" che conteneva "ieri": cercare 'mar' per il mare
+   pescherebbe "grotte marine" e "Santa Maria". Per questo 'mare' usa aWord. */
+var ARES=/(^|[^a-z0-9])(oggi|domani|dopodomani|giorno|prenotat|numer|telefon|chiamat|aperto|vicin|tramont|alba|temperatur|meteo|vestir|mangia|cena|pranz|ristor|spiagg|chies|santuar|cattedral|vino|cantin|degustaz|matrimoni|cerimoni|sposi|ricevim|dorm|hotel|alloggi|barca|escursion|museo|monument|nod|problem|attenzion|da fare)/;
+function aAsk(raw){
+ var q=aNorm(raw).trim(),i;
+ if(!q)return aOut('');
+ /* 1. un nome di luogo batte una categoria, ma non una parola riservata */
+ var byn=ARES.test(q)?null:aByName(q);
+ if(byn)return aOut(byn);
+ /* 2. le telefonate: la cosa piu' urgente del viaggio, quindi la prima regola vera */
+ if(aHas(q,'telefon')||aHas(q,'chiamat')||aHas(q,'da fare')||aHas(q,'prima di partire')){
+  var h=aT('Da fare prima di partire ('+CALLS.length+')');
+  CALLS.forEach(function(c){
+   h+='<div class="row"><div class="row-b">'+eE(c.pr)+'</div><div class="row-m">'+
+    '<div class="row-n">'+eE(c.w)+'</div>'+
+    '<div class="row-d">'+eE(c.wh)+'</div>'+
+    '<div class="row-meta">Scadenza: '+eE(c.dl)+'</div>'+
+    '<div class="row-meta">'+eE(c.y)+'</div></div>'+
+    (c.ph?'<div class="tools"><a class="tool" href="tel:'+eE(c.ph.replace(/ /g,''))+'" title="Chiama" aria-label="Chiama '+eE(c.wh)+'">📞</a></div>':'')+
+    '</div>'});
+  return aOut(h)}
+ /* 3. il cibo PRIMA del giorno, o "dove mangiamo stasera" risponde col programma */
+ if(aHas(q,'mangia')||aHas(q,'cena')||aHas(q,'pranz')||aHas(q,'ristor')){
+  var h='',j=aDayIdx();
+  if(j!=null){var m=DAYS[j].ev.filter(function(x){return x.k==='meal'&&x.p});
+   if(m.length)h+=aT('Oggi si mangia qui')+m.map(function(x){return pCard(PBI[x.p],x.t)}).join('')}
+  return aOut(h+aByTag(['mangiare'],'Tutti i posti per mangiare'))}
+ /* 4. le categorie di QUESTO viaggio */
+ if(aWord(q,'barca')||aHas(q,'grott')||aHas(q,'escursion'))
+  return aOut(aByTag(['barca','grotte'],'🚤 La barca e le grotte'));
+ if(aHas(q,'matrimoni')||aHas(q,'cerimoni')||aHas(q,'sposi')||aHas(q,'ricevim'))
+  return aOut(aByTag(['matrimonio'],'💍 Il matrimonio')+aDayRows(DAYS[2]));
+ /* "spiagge" e "mare" NON sono la stessa domanda: chi chiede le spiagge vuole
+    posti dove stendersi, e il tour in barca (che porta il tag `mare`) non lo e'.
+    Il test lo pretende, e prima di separarle rispondevano identiche. */
+ if(aHas(q,'spiagg'))return aOut(aByTag(['spiagge'],'🏖️ Le spiagge'));
+ if(aWord(q,'mare')||aHas(q,'bagn'))return aOut(aByTag(['spiagge','mare'],'🌊 Il mare'));
+ if(aHas(q,'chies')||aHas(q,'santuar')||aHas(q,'cattedral'))
+  return aOut(aByTag(['chiesa'],'⛪ Chiese e santuari'));
+ if(aHas(q,'vino')||aHas(q,'cantin')||aHas(q,'degustaz'))
+  return aOut(aByTag(['vino','cantina'],'🍷 Vino'));
+ if(aHas(q,'museo')||aHas(q,'monument'))
+  return aOut(aByTag(['monumenti','museo'],'🏛️ Monumenti e musei'));
+ /* 5. i giorni */
+ if(aWord(q,'oggi')){i=aDayIdx();return aOut(i==null?aFuori():aDayRows(DAYS[i]))}
+ if(aWord(q,'domani')){i=aDayIdx(1);return aOut(i==null?aFuori():aDayRows(DAYS[i]))}
+ if(aWord(q,'dopodomani')){i=aDayIdx(2);return aOut(i==null?aFuori():aDayRows(DAYS[i]))}
+ var mg=q.match(/(?:giorno|g)\s*([1-9])/);
+ if(mg){var n=+mg[1];if(n>=1&&n<=DAYS.length)return aOut(aDayRows(DAYS[n-1]))}
+ /* 6. dove dormo */
+ if(aHas(q,'dorm')||aHas(q,'hotel')||aHas(q,'alloggi')){
+  var h=aT('Le tre notti');
+  DAYS.forEach(function(d){var sid=SLEEP[String(d.d)];
+   if(sid&&PBI[sid])h+=pCard(PBI[sid],'G'+d.d)});
+  return aOut(h)}
+ /* 7. le prenotazioni */
+ if(aHas(q,'prenot')){
+  var h=aT('Prenotazioni ('+BK.length+')');
+  BK.forEach(function(b){var p=b.p?PBI[b.p]:null;
+   h+='<div class="row"><div class="row-b">'+(b.st==='pending'?'DA FARE':'OK')+'</div><div class="row-m">'+
+    '<div class="row-n">'+eE(p?p.n:b.id)+'</div>'+
+    (b.fn?'<div class="row-meta">'+eE(b.fn)+'</div>':'')+
+    (b.dt?'<div class="row-meta">'+eE(b.dt+(b.tm?' alle '+b.tm:''))+'</div>':'')+
+    (b.rf?'<div class="row-meta">Conferma '+eE(b.rf)+(b.pin?' · PIN '+eE(b.pin):'')+'</div>':'')+
+    (b.pr&&b.pr.amount!=null?'<div class="row-meta">€ '+eE(b.pr.amount)+'</div>':'')+
+    (b.mp?'<div class="row-meta">🗺️ Ritrovo: '+eE(b.mp)+(b.mt?' alle '+eE(b.mt):'')+'</div>':'')+
+    (b.cx?'<div class="row-meta">Cancellazione: '+eE(b.cx)+'</div>':'')+
+    (b.nt?'<div class="warn"><b>🎟️</b> '+eE(b.nt)+'</div>':'')+'</div></div>'});
+  return aOut(h)}
+ /* 8. i numeri, tutti cliccabili */
+ if(aHas(q,'numer')){
+  var wp=PL.filter(function(p){return p.ph});
+  return aOut(aT('Numeri ('+wp.length+')')+wp.map(function(p){return pCard(p)}).join(''))}
+ /* 9. aperto ora — solo dove ho le fasce vere, e lo dico */
+ if(aHas(q,'aperto')){
+  var op=PL.map(function(p){return [p,openNow(p)]}).filter(function(x){return x[1]&&x[1].o});
+  var h=aT('Aperto ora ('+op.length+')')+op.map(function(x){return pCard(x[0])}).join('');
+  h+='<div class="warn"><b>⚠️</b> Solo i luoghi con orari strutturati. Di Siponto e del MAT le fonti ufficiali danno orari diversi fra loro, e di quasi tutti i ristoranti non ho orari: telefona prima di andare.</div>';
+  return aOut(h)}
+ /* 10. vicino a me */
+ if(aHas(q,'vicin')){
+  if(!navigator.geolocation)return aOut(aT('GPS non disponibile'));
+  aOut(aT('Cerco la posizione...'));
+  navigator.geolocation.getCurrentPosition(function(pos){
+   var la=pos.coords.latitude,ln=pos.coords.longitude;
+   var d=PL.map(function(p){var dx=(p.lat-la)*111,dy=(p.lng-ln)*83;
+    return [p,Math.sqrt(dx*dx+dy*dy)]}).sort(function(a,b){return a[1]-b[1]}).slice(0,10);
+   aOut(aT('I 10 piu vicini')+d.map(function(x){
+    return pCard(x[0],x[1]<1?Math.round(x[1]*1000)+'m':x[1].toFixed(1)+'km')}).join(''))},
+   function(){aOut(aT('GPS spento')+'<div class="ev-alt">Attiva la posizione e riprova.</div>')});
+  return}
+ /* 11. alba, tramonto, temperature: medie storiche, mai previsioni */
+ if(aHas(q,'tramont')||aHas(q,'alba')||aHas(q,'temperatur')||aHas(q,'meteo')||aHas(q,'vestir')){
+  var h=aT('Alba, tramonto e temperature medie');
+  DAYS.forEach(function(d){h+='<div class="row"><div class="row-b">G'+d.d+'</div><div class="row-m">'+
+   '<div class="row-n">'+eE(d.date)+'</div><div class="row-meta">🌅 '+eE(d.sr)+' · 🌇 '+eE(d.ss)+
+   ' · 🌡️ '+d.tp[0]+'–'+d.tp[1]+'°C</div></div></div>'});
+  h+='<div class="warn"><b>⚠️</b> Medie storiche 1991–2020 e alba/tramonto calcolati, non previsioni meteo. A Monte Sant’Angelo, a 800 m, la massima media è 20,9 °C: sei gradi meno che sulla costa.</div>';
+  return aOut(h)}
+ /* 12. i nodi logistici, che sono orari che non combaciano e non opinioni */
+ if(aHas(q,'nod')||aHas(q,'problem')||aHas(q,'attenzion')){
+  return aOut(aT('I tre nodi')+
+   '<div class="ev-alt"><b>1.</b> Sabato il check-in a Corato chiude alle 19:30 e a quell’ora sei al ricevimento: va concordato al telefono.</div>'+
+   '<div class="ev-alt"><b>2.</b> Sabato fra le 11:00 e le 15:00 non hai una stanza in cui vestirti: chiedi il late check-out all’Angolo.</div>'+
+   '<div class="ev-alt"><b>3.</b> Domenica l’auto è prenotata per le 13:00 e il volo parte alle 13:25: riconsegna verso mezzogiorno.</div>')}
+ /* fallback: mai un vicolo cieco */
+ aOut(aT('Non ho capito. Prova con:')+'<div class="ev-alt">'+
+  ['oggi','domani','giorno 2','telefonate','dove mangiamo','barca','matrimonio','spiagge',
+   'chiese','vino','monumenti','dove dormo','cosa e prenotato','numeri','aperto ora',
+   'vicino a me','tramonto','i nodi'].map(function(x){
+   return '<button class="ask-chip" onclick="aChip(&#39;'+x+'&#39;)">'+x+'</button>'}).join(' ')+'</div>')}
+function aChip(t){document.getElementById('askInput').value=t;aAsk(t)}
+function aSubmit(ev){ev.preventDefault();aAsk(document.getElementById('askInput').value);return false}
+
+/* ══════════ mappa ══════════ */
+function initMap(){
+ if(typeof L==='undefined'){document.getElementById('map').innerHTML=
+  '<div style="padding:20px;font-size:12px;color:#888">Mappa non disponibile offline: le tessere richiedono la rete. Indirizzi, telefoni e programma funzionano comunque.</div>';return}
+ /* Tessere da OpenStreetMap, non da CartoDB. CartoDB risponde ancora 200 ma serve
+    un'immagine con scritto "API KEY REQUIRED" sopra: lo status HTTP non lo rivela,
+    l'ho visto solo guardando uno screenshot. OSM chiede l'attribuzione, quindi il
+    controllo resta accesso (piccolo, nell'angolo). */
+ map=L.map('map',{zoomControl:false,attributionControl:true}).setView([41.52,15.9],8);
+ map.attributionControl.setPrefix('');
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+ layer=L.layerGroup().addTo(map);
+ PL.forEach(function(p){
+  var m=L.marker([p.lat,p.lng],{icon:mkIcon(p)}).addTo(layer);
+  m.bindPopup('<b>'+eE(p.n)+'</b>'+(p.d?'<br>'+eE(p.d):'')+
+   (p.ar?'<br><small>🗺️ '+eE(p.ar)+'</small>':'')+
+   (p.wa?'<br><small>⚠️ '+eE(p.wa)+'</small>':''),{maxWidth:260});
+  mk[p.id]=m});
+ var all=PL.map(function(p){return [p.lat,p.lng]});
+ if(all.length)map.fitBounds(all,{padding:[24,24]})}
+document.querySelector('.map-expand').onclick=function(){
+ var s=document.querySelector('.map-section');s.classList.toggle('expanded');
+ this.textContent=s.classList.contains('expanded')?'▴ Riduci la mappa':'▾ Ingrandisci la mappa';
+ setTimeout(function(){if(map)map.invalidateSize()},380)};
+document.getElementById('thBtn').onclick=function(){
+ var d=document.documentElement.getAttribute('data-theme')==='dark';
+ document.documentElement.setAttribute('data-theme',d?'light':'dark');
+ try{localStorage.setItem('pg_theme',d?'light':'dark')}catch(e){}};
+try{var t=localStorage.getItem('pg_theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}
+initMap();
+restoreChk();
+var di=aDayIdx();if(di!=null)setTimeout(function(){goDay(DAYS[di].d)},600);
+</script>
+<script>
+/* Il service worker si registra solo su http(s): aprendo il file dal disco
+   (file://) la registrazione fallirebbe e riempirebbe la console di errori. */
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+</script>
+</body>
+</html>
