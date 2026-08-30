@@ -8,7 +8,7 @@
    spazio. Senza rete la mappa mostra il suo avviso, il resto funziona.
 
    VERSION si deriva dallo SHA del contenuto in build_puglia.py: non si bumpa a mano. */
-var VERSION = "5972b5541a8b";
+var VERSION = "5975d04b976d";
 var CACHE = 'puglia-2026-' + VERSION;
 var URLS = ['/puglia-2026/', '/puglia-2026/index.html', '/puglia-2026/manifest.json',
             '/puglia-2026/icon-192.png', '/puglia-2026/icon-512.png'];
